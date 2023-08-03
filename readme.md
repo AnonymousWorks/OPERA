@@ -29,8 +29,6 @@ python run_tcp.py
 ```
 The result was saved in the current path (e.g., ranked_test_case_keras.py)
 
-#### 4. Testing TVM
-
 
 ----
 
