@@ -1,6 +1,6 @@
 ## OPERA: Don't Miss the Model Loading in Deep Learning Compiler Testing
 OPERA is a test-migration-based technique to improve the testing of the model loading stage of DL compilers.
-It considers different sources of test inputs in DL libraries for migration (i.e., test inputs documented in DL libraries and test inputs generated using recent fuzzers).
+It considers different sources of test inputs in DL libraries for migration.
 Also, it designs a diversity-based test prioritization strategy to migrate and execute those test inputs that are more likely to detect diverse bugs in the model loading stage, to improve the testing efficiency.
 
 
