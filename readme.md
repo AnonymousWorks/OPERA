@@ -8,10 +8,14 @@ Also, it designs a diversity-based test prioritization strategy to migrate and e
 
 ####  1. Build Environment
 > Install the test object and migration objects as follows:
-* TVM v0.13
-* PyTorch v1.7
-* Keras v2.3
-* ONNX 1.8
+* TVM v0.13:
+     Please refer to [the official documentation](https://tvm.apache.org/docs/install/from_source.html) to install it from the source. You can execute `git checkout b48fcab` to get the same version as this work before installing it.
+* PyTorch v1.7:
+     `pip install torch==1.7.0`
+* Keras v2.3:
+    `pip install keras==2.3.1`
+* ONNX 1.8:
+    `pip install onnx==1.8.0`
 
 
 #### 2. Extract Operator Instances
