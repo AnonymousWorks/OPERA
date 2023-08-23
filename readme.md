@@ -46,6 +46,7 @@ In our study, we evaluated the performance of the TCP technique on different pro
 
 
 ### Bug Details
-> The id of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
+> This work has detected 78 previously unknown bugs, 42 of which have been confirmed/fixed by TVM developers.
+The id of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
 
 
