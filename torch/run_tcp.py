@@ -111,7 +111,7 @@ if __name__ == '__main__':
     origin_test_file = "data/combined_source_torch_test.py"
     mitigated_tc_dict = preprocess_torch_test(origin_test_file)
 
-    tvm_equipped_test_file = "data/tvm_torch_all_test.py"
+    tvm_equipped_test_file = "data/_tvm_torch_all_test.py"
     tvm_tc_dict = preprocess_torch_test(tvm_equipped_test_file).all_tc
     mid = time.time()
     save_test_file = "torch_ranked_test_case.py"

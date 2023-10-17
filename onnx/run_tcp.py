@@ -154,7 +154,7 @@ if __name__ == '__main__':
     # origin_test_file = "/share_host/TVMFT/BorrowTests/keras/all_borrow_test.py"
     mitigated_tc_dict = load_onnx_tc_from_file(origin_test_file)
     mid = time.time()
-    tvm_equipped_test_file = "data/tvm_onnx_all_test.py"
+    tvm_equipped_test_file = "data/_tvm_onnx_all_test.py"
     tvm_tc_dict = load_onnx_tc_from_file(tvm_equipped_test_file).all_tc
 
     save_test_file = "onnx_ranked_test_case.py"
