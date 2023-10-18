@@ -32,13 +32,13 @@ def run_subprocess(python_program):
 
 
 def gen_test_case_file(SUT, test_str, save_dir, test_id):
-    keras_run_head = f"""from test_{SUT}_keras import layer_test
+    run_head = f"""from test_{SUT}_keras import layer_test
 from tensorflow import keras
 import tensorflow as tf
 import numpy as np
 
 """
-    test_str = keras_run_head + test_str
+    test_str = run_head + test_str
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     shutil.copy(f"test_{SUT}_keras.py", save_dir)
@@ -54,27 +54,30 @@ def run_all_test(test_file, SUT, begin_id=1):
     with open(test_file, 'r', encoding='utf-8') as f:
         all_lines = f.readlines()
 
-    all_test_cases = []
+    all_test_files = []
     for cnt, line in enumerate(all_lines):
         tc_id = cnt+begin_id
         line = line.strip()
         if line.startswith("layer_test"):
             tc_line = line.strip()[:-1] + f"count={tc_id},)"  # give correct bug_id
             save_test_file_path = gen_test_case_file(SUT, tc_line, "all_keras_tc", tc_id)
-            all_test_cases.append(save_test_file_path)
+            all_test_files.append(save_test_file_path)
             # execute the all test cases
-            run_subprocess(save_test_file_path)
+            # run_subprocess(save_test_file_path)
 
-    #pool = multiprocessing.Pool(processes=1)#multiprocessing.cpu_count()//2)
-    #pool.map(run_subprocess, all_test_cases)
-
-    #pool.close()
-    #pool.join()
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()//2)
+    pool.map(run_subprocess, all_test_files)
+    pool.close()
+    pool.join()
 
 
 if __name__ == '__main__':
+    # cd keras/fuzz
+    # python run_fuzz.py ../data/demo.py openvino
+    # python run_fuzz.py ../data/combined_sources_keras_test_41986.py openvino
+
     starttime = datetime.datetime.now()
-    collected_test_cases_file = sys.argv[1]   # ../data/combined_sources_keras_test_41986.py
+    collected_test_cases_file = sys.argv[1]
     SUT = sys.argv[2]  # [tvm, openvino]
     run_all_test(collected_test_cases_file, SUT)
     endtime = datetime.datetime.now()

@@ -168,7 +168,7 @@ def layer_test(
         print("[keras error]", e)
         return
     try:
-        res_dlc = compile_keras(model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
+        res_dlc = compile_keras(count, model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
                                 input_layout=input_layout)
     except Exception as e:
         if 'support' not in str(e):
@@ -191,17 +191,21 @@ def layer_test(
     print("[success] This test case passed!")
 
 
-def compile_keras(model, input_shape, input_data, dtype='float32', exec_mod='graph', input_layout="NCHW"):
+def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod='graph', input_layout="NCHW"):
     # [reference](https://colab.research.google.com/github/openvinotoolkit/openvino_notebooks/blob/main/notebooks/101-tensorflow-classification-to-openvino/101-tensorflow-classification-to-openvino.ipynb#scrollTo=uVXHcr4K7gS_)
-    tf.saved_model.save(model, "_temp_model")
-    ov_model = ov.convert_model('_temp_model',  input=input_shape)
-    ir_path = "_temp_ov_ir.xml"  # file must ends with 'xml'
+    import os
+    temp_model_dir = "_temp_model"
+    if not os.path.exists(temp_model_dir):
+        os.mkdir(temp_model_dir)
+    tf2_modle_path = f"{temp_model_dir}/_temp_model_{cnt}"
+    tf.saved_model.save(model, tf2_modle_path)
+    ov_model = ov.convert_model(tf2_modle_path,  input=input_shape)
+    ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
     ov.save_model(ov_model, ir_path)
     core = ov.Core()
     model = core.read_model(ir_path)
 
     import ipywidgets as widgets
-
     device = widgets.Dropdown(
         options=core.available_devices + ["AUTO"],
         value='AUTO',
