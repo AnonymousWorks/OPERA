@@ -1,10 +1,9 @@
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras import layers, models
-import tvm
-import tvm.relay as relay
 import traceback
 import re
-
+import openvino as ov
 import logging
 logging.basicConfig(level=logging.ERROR)
 
@@ -12,9 +11,9 @@ np.random.seed(2023)
 
 
 def extract_crash_message(e):
+    print(e)
     tb = traceback.extract_tb(e.__traceback__)
     file_name, line_number, _, _ = tb[-1]
-    file_name = file_name[len("/workplace/software/tvm/tvm_/"):]
     exc_type = type(e).__name__
     stack_trace = str(e).strip().split("\n")[-1]
     if stack_trace.endswith(':'):
@@ -169,11 +168,11 @@ def layer_test(
         print("[keras error]", e)
         return
     try:
-        res_tvm = compile_keras(model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
+        res_dlc = compile_keras(model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
                                 input_layout=input_layout)
     except Exception as e:
         if 'support' not in str(e):
-            print(f'[bug in tvm] using test: {layer_cls}; id= {count}')
+            print(f'[bug in dlc] using test: {layer_cls}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
             record_bug(count, 'crash', type(layer).__name__, crash_message=crash_message)
@@ -181,91 +180,44 @@ def layer_test(
     try:
         if isinstance(res_keras, list):  # multiple output:
             for i in range(len(res_keras)):
-                np.testing.assert_allclose(res_keras[i], res_tvm[i], atol=1e-3, rtol=1e-3)
+                np.testing.assert_allclose(res_keras[i], res_dlc[i], atol=1e-3, rtol=1e-3)
         else:
-            np.testing.assert_allclose(res_keras, res_tvm, atol=1e-3, rtol=1e-3)
+            np.testing.assert_allclose(res_keras, res_dlc, atol=1e-3, rtol=1e-3)
     except AssertionError as e:
-        print(f'[bug in tvm] using test: {layer_cls}; id= {count}')
+        print(f'[bug in dlc] using test: {layer_cls}; id= {count}')
         print(e)
         record_bug(count, 'wrong results', type(layer).__name__, 'wrong result')
         return
     print("[success] This test case passed!")
 
-    # ----------------------test as first layer in Sequential API---------------------------------------
-    # ---------------------- generate sequential model which diff from function model ------------------
-    '''
-    try:
-        layer_config = layer.get_config()
-        layer_config["batch_input_shape"] = input_shape
-        layer = layer.__class__.from_config(layer_config)
-
-        model = models.Sequential()
-        model.add(layers.Input(shape=input_shape[1:], dtype=input_dtype))
-        model.add(layer)
-
-        layer_weights = (
-            layer.get_weights()
-        )
-        layer.set_weights(layer_weights)
-        # res_keras = model.predict(input_data)
-        res_keras = model(input_data)
-        # model.summary()
-    except Exception as e:
-        print(e)
-        return
-    try:
-        res_tvm = compile_keras(model, input_data.shape, input_data, dtype=input_dtype, exec_mod='aot',
-                                input_layout=input_layout)
-    except Exception as e:
-        if 'support' not in str(e):  # skip the unsupported behavior
-            print(f'[bug in tvm2][seq_graph][aot_mod] using test: {layer_cls}; id = {count}')
-            print(e)
-            crash_message = extract_crash_message(e)
-            record_bug(count, 'crash', type(layer).__name__, crash_message=crash_message)
-        return
-    try:
-        # print(np.shape(res_tvm), np.shape(res_keras))
-        np.testing.assert_allclose(res_keras, res_tvm, atol=1e-3, rtol=1e-3)
-    except AssertionError as e:
-        print(f'[bug in tvm2][seq_graph][aot_mod] using test: {layer_cls}; id = {count}')
-        print(e)
-        record_bug(count, 'wrong results', type(layer).__name__, 'wrong result')
-        return
-    return'''
-
 
 def compile_keras(model, input_shape, input_data, dtype='float32', exec_mod='graph', input_layout="NCHW"):
-    target = 'llvm'
-    ctx = tvm.cpu(0)
+    # [reference](https://colab.research.google.com/github/openvinotoolkit/openvino_notebooks/blob/main/notebooks/101-tensorflow-classification-to-openvino/101-tensorflow-classification-to-openvino.ipynb#scrollTo=uVXHcr4K7gS_)
+    tf.saved_model.save(model, "_temp_model")
+    ov_model = ov.convert_model('_temp_model',  input=input_shape)
+    ir_path = "_temp_ov_ir.xml"  # file must ends with 'xml'
+    ov.save_model(ov_model, ir_path)
+    core = ov.Core()
+    model = core.read_model(ir_path)
 
-    # input_name = model.input.name.split(':')[0]
-    # shape_dict = {input_name: input_shape}
-    if isinstance(input_shape[0], list):  # multiple inputs
-        shape_dict = {name: x.shape for (name, x) in zip(model.input_names, input_data)}
-    else:
-        shape_dict = {model.input_names[0]: input_shape}
-    # print(">>>>> shape_dict:", shape_dict)
-    irmod, params = relay.frontend.from_keras(model, shape_dict, layout=input_layout)
-    # print(irmod)
-    with tvm.transform.PassContext(opt_level=3):
-        model = relay.build_module.create_executor(exec_mod, irmod, ctx, target, params).evaluate()  # graph, vm, aot
+    import ipywidgets as widgets
 
-    if isinstance(input_shape[0], list):
-        test_x_tvm = []
-        for input_i in input_data:
-            test_x_tvm.append(tvm.nd.array(input_i.astype(dtype)))
-        tvm_out = model(*test_x_tvm)
-    else:
-        test_x_tvm = tvm.nd.array(input_data.astype(dtype))
-        tvm_out = model(test_x_tvm)
-    if isinstance(tvm_out, list):  # multiple output
-        tvm_out_np = []
-        for out_i in tvm_out:
-            tvm_out_np.append(out_i.numpy())
-    else:
-        tvm_out_np = tvm_out.numpy()  # single output
+    device = widgets.Dropdown(
+        options=core.available_devices + ["AUTO"],
+        value='AUTO',
+        description='Device:',
+        disabled=False,
+    )
 
-    return tvm_out_np
+    compiled_model = core.compile_model(model=model, device_name=device.value)
+
+    # show the model structure
+    # input_key = compiled_model.input(0)
+    output_key = compiled_model.output(0)
+    # network_input_shape = input_key.shape
+
+    result = compiled_model(input_data)[output_key]
+    return result
 
 
 if __name__ == '__main__':
