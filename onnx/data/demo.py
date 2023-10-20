@@ -1,3 +1,2 @@
 make_graph(op_type='Expand', kwargs={}, input_name=('X', 'shape'), input_shape=([1, 3, 1], [2]), input_dtype=('FLOAT', 'INT64'), output_name=('Y',), output_shape=([1, 3, 1],), output_dtype=('FLOAT',))
-make_graph(op_type='Expand', kwargs={}, input_name=('X', 'shape'), input_shape=([1, 3, 1], [2]), input_dtype=('FLOAT', 'INT64'), output_name=('Y',), output_shape=([1, 3, 3],), output_dtype=('FLOAT',))
-make_graph(op_type='Expand', kwargs={}, input_name=('X', 'shape'), input_shape=([1, 3, 1], [3]), input_dtype=('FLOAT', 'INT64'), output_name=('Y',), output_shape=([3, 3, 3],), output_dtype=('FLOAT',))
+make_graph(op_type='MaxPool', kwargs={'auto_pad': b'SAME_UPPER', 'kernel_shape': [3, 3], 'strides': [2, 2]},input_name=('x',), input_shape=([1, 1, 5, 5],), input_dtype=('FLOAT',), output_name=('y',),output_shape=([1, 1, 3, 3],), output_dtype=('FLOAT',))

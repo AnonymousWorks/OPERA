@@ -44,7 +44,7 @@ def extract_crash_message(e):
     # exc_value = str(e)
     # exception_info = traceback.format_exception_only(exc_type, exc_value)
     # crash_message = f"{exception_info}_{file_name}_{line_number}"
-    onnx.helper.get_attribute_value()
+    # onnx.helper.get_attribute_value()
     crash_message = f"{exc_type}_{file_name}_{line_number}_{stack_trace}"
     return crash_message
 

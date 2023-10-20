@@ -67,7 +67,6 @@ def gen_test_case_file(test_str, frame, test_id):
 
 
 def load_test_from_file(test_file):
-    # support keras and pytorch now!
     with open(test_file, 'r', encoding='utf-8') as f:
         all_lines = f.readlines()
     all_test_str_list = []

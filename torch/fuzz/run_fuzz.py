@@ -45,14 +45,20 @@ from numpy import inf
 def tensor(x):
     return x
 
-    """
+"""
+    onnx_run_head = f"""import onnx
+from test_{SUT}_onnx import make_graph
+
+"""
 
     if frame == 'keras':
         test_str = keras_run_head + test_str
     elif frame == 'torch':
         test_str = torch_run_head + test_str
+    elif frame == 'onnx':
+        test_str = onnx_run_head + test_str
     else:
-        assert False, f"unsupported frontends {frame} yet!"  # TODO
+        assert False, f"Unsupported frontends {frame} yet!"
 
     save_dir = f"{save_dir}_{frame}"
     if not os.path.exists(save_dir):
@@ -66,21 +72,21 @@ def tensor(x):
 
 
 def _load_test_from_file(test_file, cnt=1):
-    # support keras and pytorch now!
+    # support keras, pytorch and ONNX!
     with open(test_file, 'r', encoding='utf-8') as f:
         all_lines = f.readlines()
     all_test_str_list = []
 
     this_test_case = ''
     for line in all_lines:
-        if line.startswith("verify_model") or line.startswith("layer_test"):
+        if line.startswith("verify_model") or line.startswith("layer_test") or line.startswith("make_graph"):
             line = line.strip()[:-1]
             if line.endswith(','):
                 line += f"count={cnt},)"
             else:
                 line += f",count={cnt},)"
             this_test_case += line
-            if this_test_case not in all_test_str_list: # deduplicate
+            if this_test_case not in all_test_str_list:  # deduplicate
                 all_test_str_list.append(this_test_case)
                 cnt += 1
             this_test_case = ''
@@ -117,12 +123,13 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
 if __name__ == '__main__':
     # cd keras/fuzz
     # python run_fuzz.py ../data/demo.py openvino keras
+    # python run_fuzz.py ../data/demo.py openvino onnx
     # python run_fuzz.py ../data/combined_sources_keras_test_41986.py tvm torch
 
     starttime = datetime.datetime.now()
     collected_test_cases_file = sys.argv[1]
     SUT = sys.argv[2]    # [tvm, openvino]
-    frame = sys.argv[3]  # [keras, torch]
+    frame = sys.argv[3]  # [keras, torch, onnx]
     run_all_test(collected_test_cases_file, SUT, frame)
     endtime = datetime.datetime.now()
     print("Finish all, time consuming(min): ", (endtime - starttime).seconds/60)
