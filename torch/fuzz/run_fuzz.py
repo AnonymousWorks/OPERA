@@ -57,7 +57,7 @@ def tensor(x):
     save_dir = f"{save_dir}_{frame}"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    shutil.copy(f"test_{SUT}_keras.py", save_dir)
+    shutil.copy(f"test_{SUT}_{frame}.py", save_dir)
     save_test_file_path = os.path.join(save_dir, f'test_{test_id}.py')
     if not os.path.exists(save_test_file_path):
         with open(save_test_file_path, 'w', encoding='utf-8') as test_f:
@@ -98,7 +98,7 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
         all_test_str_list = _load_test_from_file(test_file, begin_id)
         for cnt, test_str in enumerate(all_test_str_list):
             test_str = test_str.strip()
-            save_test_file_path = gen_test_case_file(SUT, test_str, frame, cnt + begin_id)
+            save_test_file_path = gen_test_case_file(SUT, test_str, frame, test_dir, cnt+begin_id)
             all_test_files.append(save_test_file_path)
     else:
         for tc in os.listdir(test_dir):
@@ -117,12 +117,12 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
 if __name__ == '__main__':
     # cd keras/fuzz
     # python run_fuzz.py ../data/demo.py openvino keras
-    # python run_fuzz.py ../data/combined_sources_keras_test_41986.py tvm pytorch
+    # python run_fuzz.py ../data/combined_sources_keras_test_41986.py tvm torch
 
     starttime = datetime.datetime.now()
     collected_test_cases_file = sys.argv[1]
     SUT = sys.argv[2]    # [tvm, openvino]
-    frame = sys.argv[3]  # [keras, pytorch]
+    frame = sys.argv[3]  # [keras, torch]
     run_all_test(collected_test_cases_file, SUT, frame)
     endtime = datetime.datetime.now()
     print("Finish all, time consuming(min): ", (endtime - starttime).seconds/60)

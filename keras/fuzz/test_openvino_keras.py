@@ -199,6 +199,9 @@ def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod
         os.mkdir(temp_model_dir)
     tf2_modle_path = f"{temp_model_dir}/_temp_model_{cnt}"
     tf.saved_model.save(model, tf2_modle_path)
+    print(input_shape)
+    print(type(input_shape))
+    assert False
     ov_model = ov.convert_model(tf2_modle_path,  input=input_shape)
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
     ov.save_model(ov_model, ir_path)
@@ -225,4 +228,10 @@ def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod
 
 
 if __name__ == '__main__':
-    pass
+    # pass
+    import keras
+    layer_test(keras.layers.BatchNormalization, args=(),
+               kwargs={'momentum': 0.99, 'epsilon': 1.001e-05, 'center': True, 'scale': True, 'beta_regularizer': None,
+                       'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
+               input_shape=[None, 14, 14, 1120], input_dtype='float32', )
+
