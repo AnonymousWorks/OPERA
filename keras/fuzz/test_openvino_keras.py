@@ -171,7 +171,7 @@ def layer_test(
         res_dlc = compile_keras(count, model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
                                 input_layout=input_layout)
     except Exception as e:
-        if 'support' not in str(e):
+        if 'support' not in str(e) and 'not allowed' not in str(e):
             print(f'[bug in dlc] using test: {layer_cls}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
@@ -199,9 +199,6 @@ def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod
         os.mkdir(temp_model_dir)
     tf2_modle_path = f"{temp_model_dir}/_temp_model_{cnt}"
     tf.saved_model.save(model, tf2_modle_path)
-    print(input_shape)
-    print(type(input_shape))
-    assert False
     ov_model = ov.convert_model(tf2_modle_path,  input=input_shape)
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
     ov.save_model(ov_model, ir_path)

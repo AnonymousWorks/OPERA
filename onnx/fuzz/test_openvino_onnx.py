@@ -272,7 +272,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         input_dtype_dlc = [dlc_dtype_mapping[dtype] for dtype in input_dtype]
         dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
     except Exception as e:
-        if 'support' not in str(e):
+        if 'support' not in str(e) and 'not allowed' not in str(e):
             print(f'[bug in dlc] using test: {op_type}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)

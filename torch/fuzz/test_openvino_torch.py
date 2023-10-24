@@ -109,8 +109,11 @@ def verify_model(
     try:
         res_dlc = compile_torch(count, trace, input_shapes, baseline_input)
     except Exception as e:
-        crash_message = extract_crash_message(e)
-        record_bug(count,   'crash', type(model_name).__name__, crash_message=crash_message)
+        if 'support' not in str(e) and 'not allowed' not in str(e):
+            print(f'[bug in dlc] using test: {type(model_name).__name__}; id= {count}')
+            print(e)
+            crash_message = extract_crash_message(e)
+            record_bug(count, 'crash', type(model_name).__name__, crash_message=crash_message)
         return
     try:
         for i, baseline_output in enumerate(baseline_outputs):
