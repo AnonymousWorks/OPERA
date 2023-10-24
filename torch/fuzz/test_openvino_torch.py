@@ -62,6 +62,7 @@ def verify_model(
         baseline."""
         input_data = [] if input_data is None else input_data
         if len(input_data[0].size()) == 0:  # input_shape is empty skip it.
+            print("[Warning] skip the test case due to the empty inputs")
             return
         custom_convert_map = custom_convert_map or {}
         expected_ops = expected_ops or []
@@ -109,7 +110,9 @@ def verify_model(
     try:
         res_dlc = compile_torch(count, trace, input_shapes, baseline_input)
     except Exception as e:
-        if 'support' not in str(e) and 'not allowed' not in str(e):
+        if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
+            print("trigger an unsupported behavior")
+        else:
             print(f'[bug in dlc] using test: {type(model_name).__name__}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
@@ -159,21 +162,8 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    # test_id: 2
-    para_0 = torch.randn([2, 3, 6, 6], dtype=torch.float64)
-    para_1 = torch.randn([3], dtype=torch.float64)
-    para_2 = torch.randn([3], dtype=torch.float64)
-    para_3 = torch.randn([3], dtype=torch.float64)
-    para_4 = torch.randn([3], dtype=torch.float64)
-    para_5 = True
-    para_6 = 0.0006353240152477764
-    para_7 = 0.001
+    # test_id: 54673
+    verify_model(torch.nn.Softplus(threshold=36, ).eval(), input_data=[torch.randn([0], dtype=torch.float64)])
 
 
-    class batch_norm(Module):
-        def forward(self, *args):
-            return torch.nn.functional.batch_norm(args[0], para_1, para_2, para_3, para_4, para_5, para_6, para_7, )
-
-
-    verify_model(batch_norm().float().eval(), input_data=para_0)
 

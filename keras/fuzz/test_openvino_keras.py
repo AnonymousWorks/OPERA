@@ -171,7 +171,9 @@ def layer_test(
         res_dlc = compile_keras(count, model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
                                 input_layout=input_layout)
     except Exception as e:
-        if 'support' not in str(e) and 'not allowed' not in str(e):
+        if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
+            print("trigger an unsupported behavior")
+        else:
             print(f'[bug in dlc] using test: {layer_cls}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
