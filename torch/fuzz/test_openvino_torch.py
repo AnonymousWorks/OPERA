@@ -111,9 +111,9 @@ def verify_model(
         res_dlc = compile_torch(count, trace, input_shapes, baseline_input)
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
-            print("trigger an unsupported behavior")
+            print("[Warning] trigger an unsupported behavior")
         else:
-            print(f'[bug in dlc] using test: {type(model_name).__name__}; id= {count}')
+            print(f'[Bug in DLC] using test: {type(model_name).__name__}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
             record_bug(count, 'crash', type(model_name).__name__, crash_message=crash_message)
@@ -162,8 +162,11 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    # test_id: 54673
-    verify_model(torch.nn.Softplus(threshold=36, ).eval(), input_data=[torch.randn([0], dtype=torch.float64)])
-
+    # test_id: 6
+    para_0 = torch.randn([7, 176, 3, 10], dtype=torch.float32)
+    class max_pool2d(Module):
+        def forward(self, *args):
+            return torch.nn.functional.max_pool2d(args[0], kernel_size=3)
+    verify_model(max_pool2d().float().eval(), input_data=para_0)
 
 

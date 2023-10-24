@@ -273,9 +273,9 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
-            print("trigger an unsupported behavior")
+            print("[Warning] trigger an unsupported behavior")
         else:
-            print(f'[bug in dlc] using test: {op_type}; id= {count}')
+            print(f'[Bug in DLC] using test: {op_type}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
             record_bug(count, 'crash', op_type, crash_message=crash_message)
@@ -287,7 +287,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         else:
             np.testing.assert_allclose(onnx_output[0], dlc_output, atol=1e-3, rtol=1e-3)
     except AssertionError as e:
-        print(f'[bug in dlc] using test: {op_type}; id= {count}')
+        print(f'[Bug in DLC] using test: {op_type}; id= {count}')
         print(e)
         crash_message = extract_crash_message(e)
         record_bug(count, 'wrong results', op_type, crash_message=crash_message)

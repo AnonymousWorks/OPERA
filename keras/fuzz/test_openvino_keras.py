@@ -172,9 +172,9 @@ def layer_test(
                                 input_layout=input_layout)
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
-            print("trigger an unsupported behavior")
+            print("[Warning] trigger an unsupported behavior")
         else:
-            print(f'[bug in dlc] using test: {layer_cls}; id= {count}')
+            print(f'[Bug in DLC] using test: {layer_cls}; id= {count}')
             print(e)
             crash_message = extract_crash_message(e)
             record_bug(count, 'crash', type(layer).__name__, crash_message=crash_message)
@@ -186,7 +186,7 @@ def layer_test(
         else:
             np.testing.assert_allclose(res_keras, res_dlc, atol=1e-3, rtol=1e-3)
     except AssertionError as e:
-        print(f'[bug in dlc] using test: {layer_cls}; id= {count}')
+        print(f'[Bug in DLC] using test: {layer_cls}; id= {count}')
         print(e)
         record_bug(count, 'wrong results', type(layer).__name__, 'wrong result')
         return
