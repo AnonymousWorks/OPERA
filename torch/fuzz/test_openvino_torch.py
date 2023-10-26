@@ -78,7 +78,6 @@ def verify_model(
 
         with torch.no_grad():
             baseline_outputs = baseline_model(*[input.clone() for input in baseline_input])
-            print(baseline_outputs)
 
         if isinstance(baseline_outputs, tuple):
             for out in baseline_outputs:
@@ -99,7 +98,7 @@ def verify_model(
         # input_names = [f"input{idx}" for idx, _ in enumerate(baseline_input)]
         # input_shapes = list(zip(input_names, [inp.shape for inp in baseline_input]))
         input_shapes = list([inp.shape for inp in baseline_input])
-        # trace = torch.jit.freeze(trace)
+        trace = torch.jit.freeze(trace)
         print(input_shapes)
     except Exception as e:
         print(f"[test-{count}] torch error: ", e)
@@ -138,7 +137,7 @@ def compile_torch(cnt, model, input_shapes, input_data):
     if not os.path.exists(temp_model_dir):
         os.mkdir(temp_model_dir)
     print(input_shapes)
-    ov_model = ov.convert_model(model, input=input_shapes[0])  # input_shape only get the shape of first element of list
+    ov_model = ov.convert_model(model, example_input=input_data)  # input_shape only get the shape of first element of list
     print("convert to ov successfully...")
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"
     ov.save_model(ov_model, ir_path)
@@ -164,17 +163,8 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-
-    # verify_model(torch.nn.ConstantPad1d(value=1, padding=[], ).eval(),
-    #              input_data=[torch.randn([1, 2, 3], dtype=torch.float32)])
-
-    para_0 = torch.randn([7, 7, 9], dtype=torch.float16)
-
-
-    class dropout3d(Module):
+    para_0 = torch.randn([1, 64, 112, 112], dtype=torch.float32)
+    class max_pool2d(Module):
         def forward(self, *args):
-            return torch.nn.functional.dropout3d(args[0], training=False, )
-
-
-    verify_model(dropout3d().float().eval(), input_data=para_0)
-
+            return torch.nn.functional.max_pool2d(args[0], kernel_size=3)
+    verify_model(max_pool2d().float().eval(), input_data=para_0)

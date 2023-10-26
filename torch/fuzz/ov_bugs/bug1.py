@@ -16,7 +16,7 @@ trace = torch.jit.freeze(trace)  # fix the issue-1, it can convert to OV_IR, but
 input_shapes = list([inp.shape for inp in input_data])
 print(input_shapes)
 
-ov_model = ov.convert_model(trace, input=input_shapes)
+ov_model = ov.convert_model(trace, input=input_shapes, example_input=input_data)
 print("convert to ov successfully...")
 ir_path = f"/_temp_OVIR.xml"  # file must ends with 'xml'
 ov.save_model(ov_model, ir_path)
