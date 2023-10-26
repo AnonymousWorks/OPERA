@@ -305,7 +305,7 @@ def compile_onnx(cnt, model, input_shapes, input_data):
     print(input_shapes)
     ov_model = ov.convert_model(model_path)  # input=input_shapes
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
-    ov.save_model(ov_model, ir_path)
+    ov.save_model(ov_model, ir_path, compress_to_fp16=False)
     core = ov.Core()
     model = core.read_model(ir_path)
 

@@ -13,18 +13,19 @@ def compile_torch(model, input_data):
 
     ov_model = ov.convert_model(model, example_input=input_data)
     ir_path = f"{temp_model_dir}/_temp_OVIR.xml"
-    ov.save_model(ov_model, ir_path)
+    ov.save_model(ov_model, ir_path,  compress_to_fp16=False)
     core = ov.Core()
     model = core.read_model(ir_path)
 
-    device = widgets.Dropdown(
-        options=core.available_devices + ["AUTO"],
-        value='AUTO',
-        description='Device:',
-        disabled=False,
-    )
+    # device = widgets.Dropdown(
+    #     options=core.available_devices + ["AUTO"],
+    #     value='AUTO',
+    #     description='Device:',
+    #     disabled=False,
+    # )
+    # print(type(device.value))
 
-    compiled_model = core.compile_model(model=model, device_name=device.value)
+    compiled_model = core.compile_model(model=model, device_name='GPU')
     output_key = compiled_model.output(0)
     result = compiled_model(input_data)[output_key]
     return result

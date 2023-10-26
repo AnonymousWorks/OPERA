@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras as keras
 from tensorflow.keras import layers, models
 import traceback
 import re
@@ -172,6 +173,7 @@ def layer_test(
                                 input_layout=input_layout)
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
+            print(e)
             print("[Warning] trigger an unsupported behavior")
         else:
             print(f'[Bug in DLC] using test: {layer_cls}; id= {count}')
@@ -203,7 +205,7 @@ def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod
     tf.saved_model.save(model, tf2_modle_path)
     ov_model = ov.convert_model(tf2_modle_path,  input=input_shape)
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
-    ov.save_model(ov_model, ir_path)
+    ov.save_model(ov_model, ir_path, compress_to_fp16=False)
     core = ov.Core()
     model = core.read_model(ir_path)
 
@@ -215,7 +217,7 @@ def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod
         disabled=False,
     )
 
-    compiled_model = core.compile_model(model=model, device_name=device.value)
+    compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
@@ -228,9 +230,16 @@ def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod
 
 if __name__ == '__main__':
     # pass
-    import keras
-    layer_test(keras.layers.BatchNormalization, args=(),
-               kwargs={'momentum': 0.99, 'epsilon': 1.001e-05, 'center': True, 'scale': True, 'beta_regularizer': None,
-                       'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
-               input_shape=[None, 14, 14, 1120], input_dtype='float32', )
+    # layer_test(keras.layers.BatchNormalization, args=(),
+    #            kwargs={'momentum': 0.99, 'epsilon': 1.001e-05, 'center': True, 'scale': True, 'beta_regularizer': None,
+    #                    'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
+    #            input_shape=[None, 14, 14, 1120], input_dtype='float32', )
+    # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
+    # layer_test(keras.layers.CategoryEncoding, args=(),
+    #            kwargs={'num_tokens': 6, 'output_mode':"multi_hot"}, input_shape=[1, 2, 3, 4],
+    #            input_dtype='int64', )
+    layer_test(keras.layers.CategoryEncoding, args=(),
+               kwargs={'num_tokens': 6, 'output_mode': "one_hot"}, input_shape=[2],
+               input_dtype='int32', )
+
 

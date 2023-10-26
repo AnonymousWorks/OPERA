@@ -140,7 +140,7 @@ def compile_torch(cnt, model, input_shapes, input_data):
     ov_model = ov.convert_model(model, example_input=input_data)  # input_shape only get the shape of first element of list
     print("convert to ov successfully...")
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"
-    ov.save_model(ov_model, ir_path)
+    ov.save_model(ov_model, ir_path, compress_to_fp16=False)
     core = ov.Core()
     model = core.read_model(ir_path)
 
@@ -178,11 +178,18 @@ if __name__ == '__main__':
     # verify_model(pad().float().eval(), input_data=para_0)
 
     # test_id: 27684
-    para_0 = torch.randn([2, 3, 16, 15], dtype=torch.float32)
-    para_1 = torch.randn([2, 3, 3, 3], dtype=torch.float32)
+    # para_0 = torch.randn([2, 3, 16, 15], dtype=torch.float32)
+    # para_1 = torch.randn([2, 3, 3, 3], dtype=torch.float32)
+    # class conv2d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.conv2d(args[0], para_1,)
+    # verify_model(conv2d().float().eval(), input_data=para_0)
 
-    class conv2d(Module):
+    # test_id: 15508
+    para_0 = torch.randn([3, 28], dtype=torch.float32)
+    para_1 = torch.randn([56, 28], dtype=torch.float32)
+
+    class linear(Module):
         def forward(self, *args):
-            return torch.nn.functional.conv2d(args[0], para_1,)
-
-    verify_model(conv2d().float().eval(), input_data=para_0)
+            return torch.nn.functional.linear(args[0], para_1, )
+    verify_model(linear().float().eval(), input_data=para_0)
