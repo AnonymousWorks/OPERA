@@ -99,7 +99,7 @@ def verify_model(
         # input_shapes = list(zip(input_names, [inp.shape for inp in baseline_input]))
         input_shapes = list([inp.shape for inp in baseline_input])
         trace = torch.jit.freeze(trace)
-        print(input_shapes)
+        # print(input_shapes)
     except Exception as e:
         print(f"[test-{count}] torch error: ", e)
         return  # TODO: modify the test_case extraction method to get correct api_call rather than ignore it.
@@ -107,7 +107,7 @@ def verify_model(
     try:
         res_dlc = compile_torch(count, trace, input_shapes, baseline_input)
     except Exception as e:
-        if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
+        if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e) or 'type must be' in str(e):
             print(e)
             print("[Warning] trigger an unsupported behavior")
         else:
@@ -117,10 +117,10 @@ def verify_model(
             record_bug(count, 'crash', type(model_name).__name__, crash_message=crash_message)
         return
     try:
-        print(len(baseline_outputs))
+        # print(len(baseline_outputs))
         for i, baseline_output in enumerate(baseline_outputs):
             output = res_dlc[i]
-            print(output.shape)
+            # print(output.shape)
             assert_shapes_match(baseline_output, output)
             if check_correctness:
                 np.testing.assert_allclose(baseline_output, output, rtol=rtol, atol=atol)
@@ -136,7 +136,7 @@ def compile_torch(cnt, model, input_shapes, input_data):
     temp_model_dir = "_temp_model"
     if not os.path.exists(temp_model_dir):
         os.mkdir(temp_model_dir)
-    print(input_shapes)
+    # print(input_shapes)
     ov_model = ov.convert_model(model, example_input=input_data)  # input_shape only get the shape of first element of list
     print("convert to ov successfully...")
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"
@@ -163,8 +163,26 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    para_0 = torch.randn([1, 64, 112, 112], dtype=torch.float32)
-    class max_pool2d(Module):
+    # para_0 = torch.randn([1, 1, 5, 6, 7], dtype=torch.float32)
+    # para_1 = (4, 5, 7)
+    # class avg_pool3d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
+    # verify_model(avg_pool3d().float().eval(), input_data=para_0)
+
+
+    # class pad(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.pad(args[0], (25, 25), )
+    # para_0 = torch.randn([1, 6, 51], dtype=torch.complex64)
+    # verify_model(pad().float().eval(), input_data=para_0)
+
+    # test_id: 27684
+    para_0 = torch.randn([2, 3, 16, 15], dtype=torch.float32)
+    para_1 = torch.randn([2, 3, 3, 3], dtype=torch.float32)
+
+    class conv2d(Module):
         def forward(self, *args):
-            return torch.nn.functional.max_pool2d(args[0], kernel_size=3)
-    verify_model(max_pool2d().float().eval(), input_data=para_0)
+            return torch.nn.functional.conv2d(args[0], para_1,)
+
+    verify_model(conv2d().float().eval(), input_data=para_0)

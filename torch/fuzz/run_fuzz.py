@@ -125,7 +125,7 @@ if __name__ == '__main__':
     # python run_fuzz.py ../data/demo.py openvino keras
     # python run_fuzz.py ../data/demo.py openvino onnx
     # python run_fuzz.py ../data/combined_sources_keras_test_41986.py tvm keras
-    # python run_fuzz.py ../data/combined_source_torch_test_64756 openvino torch
+    # python run_fuzz.py ../data/combined_source_torch_test_64756.py openvino torch
 
     starttime = datetime.datetime.now()
     collected_test_cases_file = sys.argv[1]

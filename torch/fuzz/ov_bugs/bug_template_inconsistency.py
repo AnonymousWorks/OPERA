@@ -6,12 +6,12 @@ import os
 import numpy as np
 
 
-def compile_torch(model, input_shapes, input_data):
+def compile_torch(model, input_data):
     temp_model_dir = "_temp_model"
     if not os.path.exists(temp_model_dir):
         os.mkdir(temp_model_dir)
 
-    ov_model = ov.convert_model(model, input=input_shapes)
+    ov_model = ov.convert_model(model, example_input=input_data)
     ir_path = f"{temp_model_dir}/_temp_OVIR.xml"
     ov.save_model(ov_model, ir_path)
     core = ov.Core()
@@ -25,34 +25,26 @@ def compile_torch(model, input_shapes, input_data):
     )
 
     compiled_model = core.compile_model(model=model, device_name=device.value)
-
     output_key = compiled_model.output(0)
-
     result = compiled_model(input_data)[output_key]
-    return [result]
-
-input_shapes = [7, 176, 3, 10]
-input_data = torch.randn(input_shapes, dtype=torch.float32)
+    return result
 
 
-class max_pool2d(Module):
+weight = torch.randn([2, 3, 3, 3], dtype=torch.float32)
+input_data = torch.randn([2, 3, 16, 15], dtype=torch.float32)
+
+
+class conv2d(Module):
     def forward(self, *args):
-        return torch.nn.functional.max_pool2d(args[0], kernel_size=3)
-
-baseline_model = max_pool2d().float().eval()
-
-baseline_outputs = baseline_model(*[input.clone() for input in input_data])
-baseline_outputs = tuple(out.cpu().numpy() for out in baseline_outputs)
-print(baseline_outputs)
-
-trace = torch.jit.trace(baseline_model, [input.clone() for input in input_data])
-print(type(input_shapes))
-input_shapes = list([inp.shape for inp in input_data])
-print(type(input_shapes))
+        return torch.nn.functional.conv2d(args[0], weight)
 
 
-res_dlc = compile_torch(trace, input_shapes, input_data)
+torch_model = conv2d().float().eval()
+torch_outputs = torch_model(input_data).cpu().numpy()
 
-for i, baseline_output in enumerate(baseline_outputs):
-    output = res_dlc[i]
-    np.testing.assert_allclose(baseline_output, output, rtol=1e-3, atol=1e-3)
+trace = torch.jit.trace(torch_model, input_data)
+trace = torch.jit.freeze(trace)
+
+input_shapes = input_data.shape
+res_ov = compile_torch(trace, input_data)
+np.testing.assert_allclose(torch_outputs, res_ov, rtol=1e-3, atol=1e-3)
