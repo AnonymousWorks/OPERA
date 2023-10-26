@@ -106,21 +106,16 @@ def gen_fun_call_func(api, para):
         elif k == 'output_signature':
             output_signature = v
             pass
+        # TODO: check the following branch
+        elif k == 'input' and isinstance(v, dict) and len(v) == 2 and 'shape' in v.keys() and 'dtype' in v.keys():
+            tensor_v = input_dict2data(v)
+            params_list_declare_str += f"para_0 = {tensor_v}\n"
+            params_list_no_key.append(0)
         else:  # k = v
             if isinstance(v, str):
                 params_list_fill_str_kv += f"{k}='{v}',"
             else:
                 params_list_fill_str_kv += f"{k}={v},"
-    '''
-    input_data = "["
-    if input_signature:
-        for input_dict in input_signature:
-            input_data = f"{input_dict2data(input_dict)},"
-        input_data = input_data[:-1]
-    else:
-        input_data += "para_0"
-    input_data += "]\n"
-    '''
 
     sorted_params_list_no_key = sorted(params_list_no_key)
     # assert len(sorted_params_list_no_key) == int(sorted_params_list_no_key[-1])
@@ -174,7 +169,7 @@ def write_fn(func_name, params, input_signature, output_signature):
         count = GlobalVar.count
         GlobalVar.add_count()
 
-        with open('./tvm_torch_test.py', 'a') as f:
+        with open('./migrate_torch_tc.py', 'a') as f:
             f.write(f"# test_id: {count} \n{api_call}\n")
             # all_api_call.append(api_call)
             GlobalVar.add_call(api_call)
