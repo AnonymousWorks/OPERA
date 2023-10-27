@@ -163,33 +163,22 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    # para_0 = torch.randn([1, 1, 5, 6, 7], dtype=torch.float32)
-    # para_1 = (4, 5, 7)
-    # class avg_pool3d(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
-    # verify_model(avg_pool3d().float().eval(), input_data=para_0)
-
-
     # class pad(Module):
     #     def forward(self, *args):
     #         return torch.nn.functional.pad(args[0], (25, 25), )
     # para_0 = torch.randn([1, 6, 51], dtype=torch.complex64)
     # verify_model(pad().float().eval(), input_data=para_0)
 
-    # test_id: 27684
-    # para_0 = torch.randn([2, 3, 16, 15], dtype=torch.float32)
-    # para_1 = torch.randn([2, 3, 3, 3], dtype=torch.float32)
-    # class conv2d(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.conv2d(args[0], para_1,)
-    # verify_model(conv2d().float().eval(), input_data=para_0)
+    # input_data = [torch.randn([0, 3, 3, 4, 5], dtype=torch.float32)]
+    # print(input_data)
+    # verify_model(torch.nn.Conv3d(3, 4, (2, 3, 4), ).eval(),
+    #              input_data=input_data)
 
-    # test_id: 15508
-    para_0 = torch.randn([3, 28], dtype=torch.float32)
-    para_1 = torch.randn([56, 28], dtype=torch.float32)
+    # test_id: 4134
+    para_0 = torch.randn([1, 16, 4, 4], dtype=torch.float32)
 
-    class linear(Module):
+    class avg_pool2d(Module):
         def forward(self, *args):
-            return torch.nn.functional.linear(args[0], para_1, )
-    verify_model(linear().float().eval(), input_data=para_0)
+            return torch.nn.functional.avg_pool2d(args[0], ceil_mode=True,  kernel_size=(1, 2), padding=(0, 1), stride=2)
+
+    verify_model(avg_pool2d().float().eval(), input_data=para_0)

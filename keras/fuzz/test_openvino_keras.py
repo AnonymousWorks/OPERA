@@ -235,11 +235,9 @@ if __name__ == '__main__':
     #                    'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
     #            input_shape=[None, 14, 14, 1120], input_dtype='float32', )
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
-    # layer_test(keras.layers.CategoryEncoding, args=(),
-    #            kwargs={'num_tokens': 6, 'output_mode':"multi_hot"}, input_shape=[1, 2, 3, 4],
-    #            input_dtype='int64', )
     layer_test(keras.layers.CategoryEncoding, args=(),
-               kwargs={'num_tokens': 6, 'output_mode': "one_hot"}, input_shape=[2],
-               input_dtype='int32', )
+               kwargs={'num_tokens': 6, 'output_mode':"multi_hot"}, input_shape=[2, 4],
+               input_dtype='int64', )
+
 
 
