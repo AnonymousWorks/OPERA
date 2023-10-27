@@ -175,10 +175,30 @@ if __name__ == '__main__':
     #              input_data=input_data)
 
     # test_id: 4134
-    para_0 = torch.randn([1, 16, 4, 4], dtype=torch.float32)
+    # para_0 = torch.randn([1, 16, 4, 4], dtype=torch.float32)
+    #
+    # class avg_pool2d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.avg_pool2d(args[0], ceil_mode=True,  kernel_size=(1, 2), padding=(0, 1), stride=2)
+    # verify_model(avg_pool2d().float().eval(), input_data=para_0)
 
-    class avg_pool2d(Module):
+    # para_0 = torch.randn([1, 3, 7, 7], dtype=torch.float32)
+    # class lp_pool2d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.lp_pool2d(args[0], norm_type=1.5, kernel_size=2)
+    # verify_model(lp_pool2d().float().eval(), input_data=para_0)
+
+    # test_id: 13877
+    # para_0 = torch.randn([1, 9216], dtype=torch.float32)
+    # class dropout(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.dropout(args[0])
+    # verify_model(dropout().float().eval(), input_data=para_0)
+
+    para_0 = torch.randn([19, 19], dtype=torch.float32)
+
+    class normalize(Module):
         def forward(self, *args):
-            return torch.nn.functional.avg_pool2d(args[0], ceil_mode=True,  kernel_size=(1, 2), padding=(0, 1), stride=2)
+            return torch.nn.functional.normalize(args[0], p=33172276018, )
 
-    verify_model(avg_pool2d().float().eval(), input_data=para_0)
+    verify_model(normalize().float().eval(), input_data=para_0)

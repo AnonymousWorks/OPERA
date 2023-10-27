@@ -16,16 +16,15 @@ def compile_torch(model, input_data):
     result = compiled_model(input_data)[output_key]
     return result
 
-weight = torch.randn([2, 3, 3, 3], dtype=torch.float32)
-input_data = torch.randn([2, 3, 16, 15], dtype=torch.float32)
+input_data = torch.randn([1, 3, 7, 7], dtype=torch.float32)
 
 
-class conv2d(Module):
+class lp_pool2d(Module):
     def forward(self, *args):
-        return torch.nn.functional.conv2d(args[0], weight)
+        return torch.nn.functional.lp_pool2d(args[0], norm_type=1.5, kernel_size=2)
 
 
-torch_model = conv2d().float().eval()
+torch_model = lp_pool2d().float().eval()
 torch_outputs = torch_model(input_data).cpu().numpy()
 
 trace = torch.jit.trace(torch_model, input_data)

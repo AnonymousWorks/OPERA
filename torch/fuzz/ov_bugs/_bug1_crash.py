@@ -32,4 +32,3 @@ device = widgets.Dropdown(
 )
 
 compiled_model = core.compile_model(model=model, device_name=device.value)
-
