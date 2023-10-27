@@ -22,7 +22,7 @@ input_data = torch.randn([19, 19], dtype=torch.float32)
 
 class normalize(Module):
     def forward(self, *args):
-        return torch.nn.functional.normalize(args[0], p=33172276018)
+        return torch.nn.functional.normalize(args[0], p=33172276018.0)
 
 
 torch_model = normalize().float().eval()
