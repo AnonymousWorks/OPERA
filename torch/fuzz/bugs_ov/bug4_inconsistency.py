@@ -17,12 +17,12 @@ def compile_torch(model, input_data):
     return result
 
 
-input_data = torch.randn([19, 19], dtype=torch.float32)
+input_data = torch.randn([2, 3], dtype=torch.float32)
 
 
 class normalize(Module):
     def forward(self, *args):
-        return torch.nn.functional.normalize(args[0], p=33172276018.0)
+        return torch.nn.functional.normalize(args[0], p=1e11)
 
 
 torch_model = normalize().float().eval()

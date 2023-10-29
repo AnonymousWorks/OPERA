@@ -268,6 +268,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
     except Exception as e:
         print("[onnx error]", e)
         return
+    dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
     try:
         input_dtype_dlc = [dlc_dtype_mapping[dtype] for dtype in input_dtype]
         dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
@@ -328,10 +329,5 @@ def compile_onnx(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    # make_graph(op_type='Expand', kwargs={}, input_name=('X', 'shape'), input_shape=([1, 3, 1], [3]),
-    #            input_dtype=('FLOAT', 'INT64'), output_name=('Y',), output_shape=([3, 3, 3],), output_dtype=('FLOAT',))
-    # make_graph(op_type='Bernoulli', kwargs={}, input_name=('x',), input_shape=([10],), input_dtype=('DOUBLE',),
-    #            output_name=('y',), output_shape=([10],), output_dtype=('DOUBLE',))
-    make_graph(op_type='MaxPool', kwargs={'auto_pad': b'SAME_UPPER', 'kernel_shape': [3, 3], 'strides': [2, 2]},
-               input_name=('x',), input_shape=([1, 1, 5, 5],), input_dtype=('FLOAT',), output_name=('y',),
-               output_shape=([1, 1, 3, 3],), output_dtype=('FLOAT',))
+    make_graph(op_type='Constant', kwargs={'value': '0.42'}, input_name=('x',), input_shape=([],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
+
