@@ -234,5 +234,7 @@ if __name__ == '__main__':
     #                    'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
     #            input_shape=[None, 14, 14, 1120], input_dtype='float32', )
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
-    layer_test(keras.layers.UpSampling2D,args=(),kwargs={},input_shape=[7, 11, 15, 1],input_dtype='int16',)
+    layer_test(keras.layers.ReLU, args=(), kwargs={'threshold': 1, }, input_shape=[20, 20, 5, 1, 6],
+               input_dtype='int8', )
+
 
