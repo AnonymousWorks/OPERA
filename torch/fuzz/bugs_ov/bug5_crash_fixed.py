@@ -1,3 +1,4 @@
+# [fixed] https://github.com/openvinotoolkit/openvino/issues/20731
 import torch
 import openvino as ov
 

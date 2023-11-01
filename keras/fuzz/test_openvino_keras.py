@@ -6,6 +6,7 @@ import traceback
 import re
 import openvino as ov
 import logging
+import os
 logging.basicConfig(level=logging.ERROR)
 
 np.random.seed(2023)
@@ -165,12 +166,16 @@ def layer_test(
         # model.summary()
         res_keras = model(input_data)
         # print('debug,', input_shape, input_data.shape)
+        temp_model_dir = "_temp_model"
+        if not os.path.exists(temp_model_dir):
+            os.mkdir(temp_model_dir)
+        tf2_model_path = f"{temp_model_dir}/_temp_model_{count}"
+        tf.saved_model.save(model, tf2_model_path)
     except Exception as e:
         print("[keras error]", e)
         return
     try:
-        res_dlc = compile_keras(count, model, input_shape, input_data, dtype=input_dtype, exec_mod='vm',
-                                input_layout=input_layout)
+        res_dlc = compile_keras(count, tf2_model_path, input_shape, input_data, temp_model_dir)
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
             print(e)
@@ -195,15 +200,9 @@ def layer_test(
     print("[success] This test case passed!")
 
 
-def compile_keras(cnt, model, input_shape, input_data, dtype='float32', exec_mod='graph', input_layout="NCHW"):
+def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
     # [reference](https://colab.research.google.com/github/openvinotoolkit/openvino_notebooks/blob/main/notebooks/101-tensorflow-classification-to-openvino/101-tensorflow-classification-to-openvino.ipynb#scrollTo=uVXHcr4K7gS_)
-    import os
-    temp_model_dir = "_temp_model"
-    if not os.path.exists(temp_model_dir):
-        os.mkdir(temp_model_dir)
-    tf2_modle_path = f"{temp_model_dir}/_temp_model_{cnt}"
-    tf.saved_model.save(model, tf2_modle_path)
-    ov_model = ov.convert_model(tf2_modle_path,  input=input_shape)
+    ov_model = ov.convert_model(model,  input=input_shape)
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
     ov.save_model(ov_model, ir_path, compress_to_fp16=False)
     core = ov.Core()
@@ -235,9 +234,6 @@ if __name__ == '__main__':
     #                    'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
     #            input_shape=[None, 14, 14, 1120], input_dtype='float32', )
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
-    layer_test(keras.layers.CategoryEncoding, args=(),
-               kwargs={'num_tokens': 6, 'output_mode':"multi_hot"}, input_shape=[2, 4],
-               input_dtype='int64', )
-
+    layer_test(keras.layers.LeakyReLU,args=(), kwargs={},input_shape=[12, 15, 3],input_dtype='int16',)
 
 
