@@ -2,22 +2,19 @@ import onnx
 from onnx import helper
 import numpy as np
 import onnxruntime
-
 import tensorrt as trt
 import pycuda.driver as cuda
 import pycuda.autoinit
-
 import os
 import traceback
 import re
 import random
 import string
-
-
 import logging
-logging.basicConfig(level=logging.ERROR)
 
+logging.basicConfig(level=logging.ERROR)
 np.random.seed(2023)
+
 
 def convert_kwargs(kwargs):
     new_kwargs = {}
@@ -31,6 +28,7 @@ def convert_kwargs(kwargs):
         else:
             new_kwargs[key] = value
     return new_kwargs
+
 
 def extract_crash_message(e):
     tb = traceback.extract_tb(e.__traceback__)
