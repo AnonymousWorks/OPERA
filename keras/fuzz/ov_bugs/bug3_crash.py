@@ -17,3 +17,5 @@ model.summary()
 res_keras = model(input_data)
 tf.saved_model.save(model, "tf_model")
 ov_model = ov.convert_model("tf_model",  input=input_shape)
+
+# [crash] Input element type must be f32, f16, bf16, i8, u8, i64, i32

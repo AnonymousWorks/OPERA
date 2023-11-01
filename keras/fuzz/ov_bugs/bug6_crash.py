@@ -1,3 +1,4 @@
+# [] https://github.com/openvinotoolkit/openvino/issues/20822
 import tensorflow as tf
 from tensorflow import keras as keras
 from tensorflow.keras import layers, models
@@ -6,8 +7,8 @@ import openvino as ov
 
 layer = keras.layers.Attention(causal=True)
 input_shape = [1, 3, 1]
-
-input_data = [np.random.random(input_shape) for i in range(2)]
+input1 = np.random.random(input_shape)
+input_data = [input1, input1]
 weights = layer.get_weights()
 layer.set_weights(weights)
 

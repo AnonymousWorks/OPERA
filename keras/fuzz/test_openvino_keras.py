@@ -16,6 +16,7 @@ def extract_crash_message(e):
     print(e)
     tb = traceback.extract_tb(e.__traceback__)
     file_name, line_number, _, _ = tb[-1]
+    file_name = file_name.split("site-packages")[-1]
     exc_type = type(e).__name__
     stack_trace = str(e).strip().split("\n")[-1]
     if stack_trace.endswith(':'):
@@ -123,29 +124,11 @@ def layer_test(
         kwargs = kwargs or {}
         args = args or ()
 
-        # parse layout
-        data_format = kwargs["data_format"] if "data_format" in kwargs.keys() else None
-
         input_shape = correct_shape(input_shape, layer_cls.__name__)
-
-        if data_format:
-            input_layout = "NCHW" if data_format == "channels_first" else "NHWC"
-            if len(input_shape) == 5:  # solve the conflict constraints
-                input_shape = input_shape[1:]
-        elif len(input_shape) == 5:
-            input_layout = "NDHWC"
-        elif len(input_shape) == 3:
-            input_layout = "NWC"
-        else:
-            input_layout = "NHWC"  # default for keras model
-
         input_shape = parse_input_shape(input_shape)
-
         input_data = assign_input_data(input_shape, input_dtype)  # Notice, input_shape will be changed.
-        # input_shape = input_data.shape  # update input_shape
 
         layer = layer_cls(*args, **kwargs)
-
         weights = layer.get_weights()
         layer.set_weights(weights)
 
@@ -197,7 +180,7 @@ def layer_test(
         print(e)
         record_bug(count, 'wrong results', type(layer).__name__, 'wrong result')
         return
-    print("[success] This test case passed!")
+    print("[Success] This test case passed!")
 
 
 def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
@@ -229,10 +212,6 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
 
 if __name__ == '__main__':
     # pass
-    # layer_test(keras.layers.BatchNormalization, args=(),
-    #            kwargs={'momentum': 0.99, 'epsilon': 1.001e-05, 'center': True, 'scale': True, 'beta_regularizer': None,
-    #                    'gamma_regularizer': None, 'beta_constraint': None, 'gamma_constraint': None, },
-    #            input_shape=[None, 14, 14, 1120], input_dtype='float32', )
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
     layer_test(keras.layers.Attention,args=(),kwargs={'causal':True,},input_shape=[(1, 3, 1), (1, 3, 1)],input_dtype='float32',)
 

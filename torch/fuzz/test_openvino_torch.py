@@ -27,6 +27,7 @@ def assert_shapes_match(tru, est):
 def extract_crash_message(e):
     tb = traceback.extract_tb(e.__traceback__)
     file_name, line_number, _, _ = tb[-1]
+    file_name = file_name.split("site-packages")[-1]
     exc_type = type(e).__name__
     stack_trace = str(e).strip().split("\n")[-1]
     if stack_trace.endswith(':'):

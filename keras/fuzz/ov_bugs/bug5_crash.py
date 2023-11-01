@@ -18,3 +18,5 @@ res_keras = model(input_data)
 tf2_model_path = f"_temp_model"
 tf.saved_model.save(model, tf2_model_path)
 ov_model = ov.convert_model(tf2_model_path,  input=input_shape)
+
+# [crash]:Encountered unknown element type i8
