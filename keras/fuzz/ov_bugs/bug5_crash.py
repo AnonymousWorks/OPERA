@@ -9,7 +9,7 @@ layer = keras.layers.ReLU(threshold=1)
 input_shape = [1, 2, 3]
 input_data = np.random.randint(0, 2, size=input_shape)
 print(input_data)
-x = layers.Input(shape=input_shape[1:], dtype="int8")
+x = layers.Input(shape=input_shape[1:], dtype="int16")  # int8 also trigger
 y = layer(x)
 model = models.Model(x, y)
 model.summary()
@@ -20,4 +20,4 @@ tf.saved_model.save(model, tf2_model_path)
 ov_model = ov.convert_model(tf2_model_path,  input=input_shape)
 
 # [crash]:Encountered unknown element type i8
-# https://github.com/openvinotoolkit/openvino/issues/20839
+# [X2] https://github.com/openvinotoolkit/openvino/issues/20839
