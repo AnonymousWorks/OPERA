@@ -54,7 +54,7 @@ def extract_crash_message(e):
 def record_bug(bug_id, bug_type, op, crash_message=''):
     bug_info_str = f"{bug_id}\t{bug_type}\t{op}\t{crash_message}\n"
 
-    with open("detected_bugs_tvm.txt", 'a', encoding='utf-8') as f:
+    with open("detected_bugs_ov.txt", 'a', encoding='utf-8') as f:
         f.write(bug_info_str)
 
 onnx_dtype_mapping = {

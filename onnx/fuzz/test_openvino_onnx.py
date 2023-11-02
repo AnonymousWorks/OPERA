@@ -244,9 +244,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         if onnxruntime.__version__ < "1.15":
             make_model_kwargs = {'ir_version': 8}
 
-        #onnx_model = helper.make_model(onnx_graph, **make_model_kwargs)
         model_def = helper.make_model(graph_def, opset_imports=[onnx.helper.make_opsetid("", 18)], **make_model_kwargs)
-        #onnx.save(model_def, 'ReduceL2.onnx')
         # Generate input data
         special_list = ['ConstantOfShape']
         input_data = {}
@@ -285,7 +283,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
             for i in range(len(output_name)):
                 np.testing.assert_allclose(onnx_output[i], dlc_output[i], atol=1e-3, rtol=1e-3)
         else:
-            np.testing.assert_allclose(onnx_output[0], dlc_output, atol=1e-3, rtol=1e-3)
+            np.testing.assert_allclose(onnx_output[0], dlc_output[0], atol=1e-3, rtol=1e-3)
     except AssertionError as e:
         print(f'[Bug in DLC] using test: {op_type}; id= {count}')
         print(e)
@@ -302,7 +300,7 @@ def compile_onnx(cnt, model, input_shapes, input_data):
         os.mkdir(temp_model_dir)
     model_path = os.path.join(temp_model_dir, f"{cnt}.onnx")
     onnx.save_model(model, model_path)
-    print(input_shapes)
+    # print(input_shapes)
     ov_model = ov.convert_model(model_path)  # input=input_shapes
     ir_path = f"{temp_model_dir}/_temp_OVIR_{cnt}.xml"  # file must ends with 'xml'
     ov.save_model(ov_model, ir_path, compress_to_fp16=False)
@@ -320,13 +318,21 @@ def compile_onnx(cnt, model, input_shapes, input_data):
 
     # show the model structure
     # input_key = compiled_model.input(0)
-    output_key = compiled_model.output(0)
+    output_key = compiled_model.outputs
+    # print("output_key:", output_key)
+    result = []
+    for output in output_key:
+        # print(output)
+        result.append(compiled_model(input_data)[output])
     # network_input_shape = input_key.shape
-
-    result = compiled_model(input_data)[output_key]
+    # result = compiled_model(input_data)[output_key]
     return result
 
 
 if __name__ == '__main__':
-    make_graph(op_type='Constant', kwargs={'value': '0.42'}, input_name=('x',), input_shape=([],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
+    # make_graph(op_type='Constant', kwargs={'value': '0.4'}, input_name=('x',), input_shape=([1],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
+    make_graph(op_type='LayerNormalization', kwargs={'axis': -1}, input_name=('X', 'W', 'B'), input_shape=([3, 4], [4], [4]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('Y', 'Mean', 'InvStdDev'), output_shape=([3, 4], [3, 1], [3, 1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT'))
+    # make_graph(op_type='Mean', kwargs={}, input_name=('data_0', 'data_1', 'data_2'), input_shape=([3], [3], [3]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('result',), output_shape=([3],), output_dtype=('FLOAT',))
+
+
 
