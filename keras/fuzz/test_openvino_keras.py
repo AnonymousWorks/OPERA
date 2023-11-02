@@ -7,8 +7,8 @@ import re
 import openvino as ov
 import logging
 import os
-logging.basicConfig(level=logging.ERROR)
 
+logging.basicConfig(level=logging.ERROR)
 np.random.seed(2023)
 
 
@@ -25,17 +25,12 @@ def extract_crash_message(e):
     pattern = r"[\[\(].*?[\]\)]"
     stack_trace = re.sub(pattern, "", stack_trace)
     print(f">>>>>>>>>>>>>>>>>>>Bug Info: {stack_trace}")
-    # exc_value = str(e)
-    # exception_info = traceback.format_exception_only(exc_type, exc_value)
-    # crash_message = f"{exception_info}_{file_name}_{line_number}"
-
     crash_message = f"{exc_type}_{file_name}_{line_number}_{stack_trace}"
     return crash_message
 
 
 def record_bug(bug_id, bug_type, op, crash_message=''):
     bug_info_str = f"{bug_id}\t{bug_type}\t{op}\t{crash_message}\n"
-
     with open("detected_bugs_new.txt", 'a', encoding='utf-8') as f:
         f.write(bug_info_str)
 
@@ -84,13 +79,13 @@ def assign_input_data(input_shape, input_dtype):
     return input_data
 
 
-def correct_shape(input_shape, layer_name):
+def correct_shape(input_shape, layer_name, max_dim_value=32):
     if input_shape is None:
         if '3D' in layer_name:
-            return [np.random.randint(1, 32) for i in range(5)]
+            return [np.random.randint(1, max_dim_value) for i in range(5)]
         elif '1D' in layer_name:
-            return [np.random.randint(1, 32) for i in range(3)]
-        return [np.random.randint(1, 32) for i in range(4)]  # default input_shape in 4 dim
+            return [np.random.randint(1, max_dim_value) for i in range(3)]
+        return [np.random.randint(1, max_dim_value) for i in range(4)]  # default input_shape in 4 dim
 
     if '1D' in layer_name:
         if len(input_shape) == 4:
@@ -199,7 +194,8 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
         disabled=False,
     )
 
-    compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
+    # compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
+    compiled_model = core.compile_model(model=model, device_name="CPU")  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
@@ -213,7 +209,9 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
 if __name__ == '__main__':
     # pass
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
-    layer_test(keras.layers.Attention,args=(),kwargs={'causal':True,},input_shape=[(1, 3, 1), (1, 3, 1)],input_dtype='float32',)
+    # layer_test(keras.layers.Attention,args=(),kwargs={'causal':True,},input_shape=[(1, 3, 1), (1, 3, 1)],input_dtype='float32',)
+    layer_test(keras.layers.Concatenate,kwargs={'axis':3,},input_shape=[[None, 7, 7, 1856], [None, 7, 7, 32]],)
+
 
 
 

@@ -4,10 +4,9 @@ import tvm
 import tvm.relay as relay
 import traceback
 import re
-
 import logging
-logging.basicConfig(level=logging.ERROR)
 
+logging.basicConfig(level=logging.ERROR)
 np.random.seed(2023)
 
 

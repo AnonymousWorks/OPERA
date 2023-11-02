@@ -10,6 +10,7 @@ warnings.filterwarnings('ignore')
 
 
 def run_subprocess(python_program):
+    this_start_time = datetime.datetime.now()
     print(f"Execute subprocess: {python_program}")
     run_flag = subprocess.run(['python', python_program], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -19,7 +20,6 @@ def run_subprocess(python_program):
         for line in output.split("\\n"):
             output_final += line
         print(output_final)
-        return
     else:  # invalid test cases
         err_output = run_flag.stderr.decode('utf-8')
         output_final = ''
@@ -28,6 +28,12 @@ def run_subprocess(python_program):
 
         print(f">>>> [Warning] Check the test case in file {python_program}")
         print(output_final)
+
+    # record the consumed time
+    tc_id = python_program.split("test_")[-1][:-3]
+    time_consume = (datetime.datetime.now() - this_start_time).seconds
+    with open(f"{frame}_time_record.txt", 'a')as f:
+        f.write(f"{tc_id}\t{time_consume}\n")
     return
 
 
@@ -114,10 +120,13 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
                 tc_file = os.path.join(test_dir, tc)
                 all_test_files.append(tc_file)
 
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()//2)
-    pool.map(run_subprocess, all_test_files)
-    pool.close()
-    pool.join()
+    # Execute the tests
+    for tc in all_test_files:
+        run_subprocess(tc)
+    # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()//2)
+    # pool.map(run_subprocess, all_test_files)
+    # pool.close()
+    # pool.join()
 
 
 if __name__ == '__main__':
@@ -125,7 +134,6 @@ if __name__ == '__main__':
     # python run_fuzz.py ../data/demo.py openvino keras
     # python run_fuzz.py ../data/demo.py openvino onnx
     # python run_fuzz.py ../data/combined_sources_keras_test_41986.py tvm keras
-    # python run_fuzz.py ../data/combined_source_torch_test_64756.py openvino torch
 
     starttime = datetime.datetime.now()
     collected_test_cases_file = sys.argv[1]
