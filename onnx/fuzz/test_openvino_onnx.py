@@ -331,8 +331,8 @@ def compile_onnx(cnt, model, input_shapes, input_data):
 
 if __name__ == '__main__':
     # make_graph(op_type='Constant', kwargs={'value': '0.4'}, input_name=('x',), input_shape=([1],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
-    make_graph(op_type='LayerNormalization', kwargs={'axis': -1}, input_name=('X', 'W', 'B'), input_shape=([3, 4], [4], [4]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('Y', 'Mean', 'InvStdDev'), output_shape=([3, 4], [3, 1], [3, 1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT'))
-    # make_graph(op_type='Mean', kwargs={}, input_name=('data_0', 'data_1', 'data_2'), input_shape=([3], [3], [3]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('result',), output_shape=([3],), output_dtype=('FLOAT',))
+    # make_graph(op_type='LayerNormalization', kwargs={'axis': -1}, input_name=('X', 'W', 'B'), input_shape=([3, 4], [4], [4]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('Y', 'Mean', 'InvStdDev'), output_shape=([3, 4], [3, 1], [3, 1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT'))
+    make_graph(op_type='ConvTranspose', kwargs={'auto_pad': b'SAME_UPPER', 'strides': [2, 2]}, input_name=('X', 'W'), input_shape=([1, 1, 3, 3], [1, 2, 3, 3]), input_dtype=('FLOAT', 'FLOAT'), output_name=('Y',), output_shape=([1, 2, 6, 6],), output_dtype=('FLOAT',))
 
 
 
