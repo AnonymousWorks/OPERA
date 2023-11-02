@@ -21,3 +21,5 @@ model.summary()
 res_keras = model(input_data)
 tf.saved_model.save(model, "tf_model")
 ov_model = ov.convert_model("tf_model",  input=input_shape)
+
+# [fixed] https://github.com/openvinotoolkit/openvino/issues/20822

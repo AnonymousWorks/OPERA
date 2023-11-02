@@ -30,3 +30,5 @@ output_key = compiled_model.output(0)
 
 res_dlc = compiled_model(input_data)[output_key]
 np.testing.assert_allclose(res_keras, res_dlc, atol=1e-3, rtol=1e-3)
+
+# [confirmed] https://github.com/openvinotoolkit/openvino/issues/20821
