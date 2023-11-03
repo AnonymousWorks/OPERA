@@ -1,4 +1,4 @@
-# [Confirmed]https://github.com/openvinotoolkit/openvino/issues/20811
+# [Confirmed] [bugs x3] https://github.com/openvinotoolkit/openvino/issues/20811
 import tensorflow as tf
 from tensorflow import keras as keras
 from tensorflow.keras import layers, models
@@ -12,7 +12,7 @@ input_data = np.random.randint(2, size=input_shape)
 # weights = layer.get_weights()
 # layer.set_weights(weights)
 
-x = layers.Input(shape=input_shape[1:], dtype="uint64")  # uint16 also trigger
+x = layers.Input(shape=input_shape[1:], dtype="uint64")  # uint16 and uint32 also trigger
 y = layer(x)
 model = models.Model(x, y)
 # model.summary()
