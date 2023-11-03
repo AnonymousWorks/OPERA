@@ -2,13 +2,13 @@ import onnxruntime as ort
 import openvino as ov
 import numpy as np
 
-onnx_model_path = '../_temp_model/ConvTranspose.onnx'
+onnx_model_path = '../_temp_model/ReverseSequence.onnx'
 session = ort.InferenceSession(onnx_model_path)
 
 
-input_x = np.random.random([1, 1, 3, 3]).astype(np.float32)
-input_w = np.random.random([1, 2, 3, 3]).astype(np.float32)
-input_data = {"X": input_x, "W": input_w}
+input_x = np.random.random([4, 4]).astype(np.float32)
+input_seq = np.random.randint(0, 2, [4], dtype=np.int64)
+input_data = {"x": input_x, "sequence_lens": input_seq}
 
 output_name = session.get_outputs()[0].name
 onnx_output = session.run([output_name], input_data)[0]

@@ -20,4 +20,4 @@ tf.saved_model.save(model, tf2_model_path)
 ov_model = ov.convert_model(tf2_model_path,  input=input_shape)
 
 # [crash]:Encountered unknown element type i8
-# [X2] https://github.com/openvinotoolkit/openvino/issues/20839
+# [bug x2] https://github.com/openvinotoolkit/openvino/issues/20839

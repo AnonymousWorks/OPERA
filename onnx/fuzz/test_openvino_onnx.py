@@ -88,6 +88,7 @@ dlc_dtype_mapping = {
     'STRING': np.str_
 }
 
+
 def assign_input_data(shape, dtype):    
     # assign value to input_data
     if dtype == onnx.TensorProto.FLOAT:
@@ -116,6 +117,7 @@ def assign_input_data(shape, dtype):
         return np.random.choice([True, False], shape)
     elif dtype == onnx.TensorProto.STRING:
         return np.array([''.join(random.choices(string.ascii_letters + string.digits, k=10)) for _ in range(np.prod(shape))]).reshape(shape)
+
 
 def make_sub_graph(string):
     op_type, kwargs, input_name, input_shape, input_dtype, output_name, output_shape, output_dtype = \
@@ -332,7 +334,7 @@ def compile_onnx(cnt, model, input_shapes, input_data):
 if __name__ == '__main__':
     # make_graph(op_type='Constant', kwargs={'value': '0.4'}, input_name=('x',), input_shape=([1],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
     # make_graph(op_type='LayerNormalization', kwargs={'axis': -1}, input_name=('X', 'W', 'B'), input_shape=([3, 4], [4], [4]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('Y', 'Mean', 'InvStdDev'), output_shape=([3, 4], [3, 1], [3, 1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT'))
-    make_graph(op_type='ConvTranspose', kwargs={'auto_pad': b'SAME_UPPER', 'strides': [2, 2]}, input_name=('X', 'W'), input_shape=([1, 1, 3, 3], [1, 2, 3, 3]), input_dtype=('FLOAT', 'FLOAT'), output_name=('Y',), output_shape=([1, 2, 6, 6],), output_dtype=('FLOAT',))
-
-
-
+    # make_graph(op_type='ConvTranspose', kwargs={'auto_pad': b'SAME_UPPER', 'strides': [2, 2]}, input_name=('X', 'W'), input_shape=([1, 1, 3, 3], [1, 2, 3, 3]), input_dtype=('FLOAT', 'FLOAT'), output_name=('Y',), output_shape=([1, 2, 6, 6],), output_dtype=('FLOAT',))
+    make_graph(op_type='ReverseSequence', kwargs={'batch_axis': 1, 'time_axis': 0}, input_name=('x', 'sequence_lens'),
+               input_shape=([4, 4], [4]), input_dtype=('FLOAT', 'INT64'), output_name=('y',), output_shape=([4, 4],),
+               output_dtype=('FLOAT',))
