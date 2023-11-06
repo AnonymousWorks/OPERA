@@ -169,7 +169,7 @@ def layer_test(
             for i in range(len(res_keras)):
                 np.testing.assert_allclose(res_keras[i], res_dlc[i], atol=1e-3, rtol=1e-3)
         else:
-            np.testing.assert_allclose(res_keras, res_dlc, atol=1e-3, rtol=1e-3)
+            np.testing.assert_allclose(res_keras, res_dlc[0], atol=1e-3, rtol=1e-3)
     except AssertionError as e:
         print(f'[Bug in DLC] using test: {layer_cls}; id= {count}')
         print(e)
@@ -195,23 +195,21 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
     )
 
     # compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
-    compiled_model = core.compile_model(model=model, device_name="CPU")  # CPU,GPU,AUTO
+    compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
-    output_key = compiled_model.output(0)
-    # network_input_shape = input_key.shape
-
-    result = compiled_model(input_data)[output_key]
+    output_key = compiled_model.outputs
+    # print("output_key:", output_key)
+    result = []
+    for output in output_key:
+        result.append(compiled_model(input_data)[output])
     return result
 
 
 if __name__ == '__main__':
     # pass
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
-    # layer_test(keras.layers.Attention,args=(),kwargs={'causal':True,},input_shape=[(1, 3, 1), (1, 3, 1)],input_dtype='float32',)
-    layer_test(keras.layers.Concatenate,kwargs={'axis':3,},input_shape=[[None, 7, 7, 1856], [None, 7, 7, 32]],)
-
-
-
+    layer_test(keras.layers.Activation, kwargs={'activation': "relu", }, input_shape=[1, 2, 3, 4], )
+    layer_test(keras.layers.GlobalAveragePooling1D,args=(),kwargs={},input_shape=[12, 2, 11],input_dtype='uint8',)
 

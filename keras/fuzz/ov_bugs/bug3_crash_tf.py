@@ -3,7 +3,7 @@ from tensorflow import keras as keras
 from tensorflow.keras import layers, models
 import numpy as np
 
-layer = keras.layers.SpatialDropout2D(rate=[3, 4, 5, 6])
+layer = keras.layers.SpatialDropout2D(rate=0.1)
 input_shape = [12, 10, 6, 18]
 input_data = np.random.random(input_shape)
 weights = layer.get_weights()

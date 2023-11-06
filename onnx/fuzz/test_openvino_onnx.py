@@ -267,7 +267,6 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
     except Exception as e:
         print("[onnx error]", e)
         return
-    dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
     try:
         input_dtype_dlc = [dlc_dtype_mapping[dtype] for dtype in input_dtype]
         dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
@@ -316,7 +315,7 @@ def compile_onnx(cnt, model, input_shapes, input_data):
         disabled=False,
     )
 
-    compiled_model = core.compile_model(model=model, device_name=device.value)
+    compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
@@ -335,6 +334,20 @@ if __name__ == '__main__':
     # make_graph(op_type='Constant', kwargs={'value': '0.4'}, input_name=('x',), input_shape=([1],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
     # make_graph(op_type='LayerNormalization', kwargs={'axis': -1}, input_name=('X', 'W', 'B'), input_shape=([3, 4], [4], [4]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('Y', 'Mean', 'InvStdDev'), output_shape=([3, 4], [3, 1], [3, 1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT'))
     # make_graph(op_type='ConvTranspose', kwargs={'auto_pad': b'SAME_UPPER', 'strides': [2, 2]}, input_name=('X', 'W'), input_shape=([1, 1, 3, 3], [1, 2, 3, 3]), input_dtype=('FLOAT', 'FLOAT'), output_name=('Y',), output_shape=([1, 2, 6, 6],), output_dtype=('FLOAT',))
-    make_graph(op_type='ReverseSequence', kwargs={'batch_axis': 1, 'time_axis': 0}, input_name=('x', 'sequence_lens'),
-               input_shape=([4, 4], [4]), input_dtype=('FLOAT', 'INT64'), output_name=('y',), output_shape=([4, 4],),
-               output_dtype=('FLOAT',))
+    # make_graph(op_type='ReverseSequence', kwargs={'batch_axis': 1, 'time_axis': 0}, input_name=('x', 'sequence_lens'),
+    #            input_shape=([4, 4], [4]), input_dtype=('FLOAT', 'INT64'), output_name=('y',), output_shape=([4, 4],),
+    #            output_dtype=('FLOAT',))
+    # make_graph(op_type='MaxPool', kwargs={'kernel_shape': [2, 2], 'storage_order': 1, 'strides': [2, 2]},
+    #            input_name=('x',), input_shape=([1, 1, 5, 5],), input_dtype=('FLOAT',), output_name=('y', 'z'),
+    #            output_shape=([1, 1, 2, 2], [1, 1, 2, 2]), output_dtype=('FLOAT', 'INT64'))
+    # make_graph(op_type='Mod', kwargs={'fmod': 1}, input_name=('x', 'y'), input_shape=([6], [6]),
+               # input_dtype=('INT64', 'INT64'), output_name=('z',), output_shape=([6],), output_dtype=('INT64',))
+    # make_graph(op_type='Shape', kwargs={'start': -1}, input_name=('x',), input_shape=([3, 4, 5],),
+    #            input_dtype=('FLOAT',), output_name=('y',), output_shape=([1],), output_dtype=('INT64',))
+    make_graph(op_type='SoftmaxCrossEntropyLoss', kwargs={'reduction': b'none'}, input_name=('x', 'y', 'w'),
+               input_shape=([3, 5], [3], [5]), input_dtype=('FLOAT', 'INT64', 'FLOAT'), output_name=('z',),
+               output_shape=([3],), output_dtype=('FLOAT',))
+
+
+
+

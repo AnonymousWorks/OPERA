@@ -4,14 +4,14 @@
 # import numpy as np
 #
 # import openvino as ov
-#
-# layer = keras.layers.ZeroPadding2D()
-# input_shape = [1, 11, 1, 7]
-# input_data = np.random.randint(2, size=input_shape)
+# a = {'return_sequences':True,'return_state':True,'go_backwards':False,'stateful':False,'unroll':False,'time_major':False,'units':2,'activation':"tanh",'recurrent_activation':"hard_sigmoid",'use_bias':True,'unit_forget_bias':True,'kernel_regularizer':None,'recurrent_regularizer':None,'bias_regularizer':None,'activity_regularizer':None,'kernel_constraint':None,'recurrent_constraint':None,'bias_constraint':None,'dropout':0.0,'recurrent_dropout':0.0,'implementation':1,}
+# layer = keras.layers.LSTM(**a)
+# input_shape = [1, 2, 3]
+# input_data = np.random.random(input_shape)
 # # weights = layer.get_weights()
 # # layer.set_weights(weights)
 #
-# x = layers.Input(shape=input_shape[1:], dtype="int8")
+# x = layers.Input(shape=input_shape[1:], dtype="float32")
 # y = layer(x)
 # model = models.Model(x, y)
 # # model.summary()
@@ -27,9 +27,8 @@
 # model = core.read_model(ir_path)
 # compiled_model = core.compile_model(model=model, device_name="CPU")
 #
-# output_key = compiled_model.output(0)
+# output_key = compiled_model.outputs
 #
-# res_dlc = compiled_model(input_data)[output_key]
-# print(res_keras)
-# print(res_dlc)
-# np.testing.assert_allclose(res_keras, res_dlc, atol=1e-3, rtol=1e-3)
+# for i,  output in enumerate(output_key):
+#     res_dlc = compiled_model(input_data)[output]
+#     np.testing.assert_allclose(res_keras[i], res_dlc, atol=1e-3, rtol=1e-3)

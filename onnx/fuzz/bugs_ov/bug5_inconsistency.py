@@ -2,16 +2,15 @@ import onnxruntime as ort
 import openvino as ov
 import numpy as np
 
-onnx_model_path = '../_temp_model/ReverseSequence.onnx'
+onnx_model_path = '../_temp_model/Shape.onnx'
 session = ort.InferenceSession(onnx_model_path)
 
 
-input_x = np.random.random([4, 4]).astype(np.float32)
-input_seq = np.random.randint(0, 2, [4], dtype=np.int64)
-input_data = {"x": input_x, "sequence_lens": input_seq}
+input_x = np.random.random([3, 4, 5]).astype(np.float32)
+input_data = {"x": input_x}
 
 output_name = session.get_outputs()[0].name
-onnx_output = session.run([output_name], input_data)[0]
+onnx_output = session.run(None, input_data)
 
 
 ov_model = ov.convert_model(onnx_model_path)
@@ -25,9 +24,9 @@ compiled_model = core.compile_model(model=model, device_name="CPU")
 
 # show the model structure
 # input_key = compiled_model.input(0)
-output_key = compiled_model.output(0)
+output_key = compiled_model.outputs
 # network_input_shape = input_key.shape
 
-ov_result = compiled_model(input_data)[output_key]
-
-np.testing.assert_allclose(onnx_output, ov_result, atol=1e-3)
+for i, output in enumerate(output_key):
+    ov_output = compiled_model(input_data)[output]
+    np.testing.assert_allclose(onnx_output[i], ov_output, atol=1e-3)
