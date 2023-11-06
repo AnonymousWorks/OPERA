@@ -156,39 +156,20 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
     # show the model structure
     # input_key = compiled_model.input(0)
-    output_key = compiled_model.output(0)
+    output_key = compiled_model.outputs
     # network_input_shape = input_key.shape
 
-    result = compiled_model(input_data)[output_key]
-    return [result]
+    # show the model structure
+    # input_key = compiled_model.input(0)
+    output_key = compiled_model.outputs
+    # print("output_key:", output_key)
+    result = []
+    for output in output_key:
+        result.append(compiled_model(input_data)[output])
+    return result
 
 
 if __name__ == '__main__':
-    # class pad(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.pad(args[0], (25, 25), )
-    # para_0 = torch.randn([1, 6, 51], dtype=torch.complex64)
-    # verify_model(pad().float().eval(), input_data=para_0)
-
-    # input_data = [torch.randn([0, 3, 3, 4, 5], dtype=torch.float32)]
-    # print(input_data)
-    # verify_model(torch.nn.Conv3d(3, 4, (2, 3, 4), ).eval(),
-    #              input_data=input_data)
-
-    # test_id: 4134
-    # para_0 = torch.randn([1, 16, 4, 4], dtype=torch.float32)
-    #
-    # class avg_pool2d(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.avg_pool2d(args[0], ceil_mode=True,  kernel_size=(1, 2), padding=(0, 1), stride=2)
-    # verify_model(avg_pool2d().float().eval(), input_data=para_0)
-
-    # para_0 = torch.randn([1, 3, 7, 7], dtype=torch.float32)
-    # class lp_pool2d(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.lp_pool2d(args[0], norm_type=1.5, kernel_size=2)
-    # verify_model(lp_pool2d().float().eval(), input_data=para_0)
-
     # test_id: 13877
     # para_0 = torch.randn([1, 9216], dtype=torch.float32)
     # class dropout(Module):
