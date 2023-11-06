@@ -21,7 +21,7 @@ ov.save_model(ov_model, ir_path, compress_to_fp16=False)
 core = ov.Core()
 model = core.read_model(ir_path)
 
-compiled_model = core.compile_model(model=model, device_name="CPU")
+compiled_model = core.compile_model(model=model, device_name="GPU")
 
 # show the model structure
 # input_key = compiled_model.input(0)
@@ -31,3 +31,5 @@ output_key = compiled_model.outputs
 for i, output in enumerate(output_key):
     ov_output = compiled_model(input_data)[output]
     np.testing.assert_allclose(onnx_output[i], ov_output, atol=1e-3)
+
+# https://github.com/openvinotoolkit/openvino/issues/20898

@@ -178,9 +178,7 @@ if __name__ == '__main__':
     # verify_model(dropout().float().eval(), input_data=para_0)
 
     para_0 = torch.randn([19, 19], dtype=torch.float32)
-
     class normalize(Module):
         def forward(self, *args):
             return torch.nn.functional.normalize(args[0], p=33172276018, )
-
     verify_model(normalize().float().eval(), input_data=para_0)

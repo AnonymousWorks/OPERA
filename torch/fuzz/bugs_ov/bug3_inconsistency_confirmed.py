@@ -17,14 +17,15 @@ def compile_torch(model, input_data):
     return result
 
 
-input_data = torch.randn([1, 9216], dtype=torch.float32)
+input_data = torch.randn([2, 3], dtype=torch.float32)
 
-class dropout(Module):
+
+class normalize(Module):
     def forward(self, *args):
-        return torch.nn.functional.dropout(args[0])
+        return torch.nn.functional.normalize(args[0], p=1e11)
 
 
-torch_model = dropout().float().eval()
+torch_model = normalize().float().eval()
 torch_outputs = torch_model(input_data).cpu().numpy()
 
 trace = torch.jit.trace(torch_model, input_data)
@@ -33,3 +34,5 @@ trace = torch.jit.freeze(trace)
 input_shapes = input_data.shape
 res_ov = compile_torch(trace, input_data)
 np.testing.assert_allclose(torch_outputs, res_ov, rtol=1e-3, atol=1e-3)
+
+# [confirmed] https://github.com/openvinotoolkit/openvino/issues/20738
