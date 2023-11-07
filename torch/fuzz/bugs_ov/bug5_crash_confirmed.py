@@ -27,4 +27,4 @@ compiled_model = core.compile_model(model=model, device_name="CPU")
 output_key = compiled_model.output(0)
 result = compiled_model(input_data)[output_key]
 
-# [让pool3d支持其他维度操作] https://github.com/openvinotoolkit/openvino/issues/20907
+# [confirmed] https://github.com/openvinotoolkit/openvino/issues/20907
