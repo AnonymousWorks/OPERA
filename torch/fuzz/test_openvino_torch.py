@@ -29,14 +29,13 @@ def extract_crash_message(e):
     file_name, line_number, _, _ = tb[-1]
     file_name = file_name.split("site-packages")[-1]
     exc_type = type(e).__name__
-    stack_trace = str(e).strip().split("\n")[-1]
-    if stack_trace.endswith(':'):
-        stack_trace = stack_trace[:-1]
-    stack_trace = stack_trace.split(':')[-1].strip()
+    stack_trace = str(e).split("Summary:")[0].strip().split("\n")[-1]
+    # if stack_trace.endswith(':'):
+    #     stack_trace = stack_trace[:-1]
+    # stack_trace = stack_trace.split(':')[-1].strip()
     pattern = r"[\[\(].*?[\]\)]"
     stack_trace = re.sub(pattern, "", stack_trace)
     print(f">>>>>>>>>>>>>>>>>>>Bug Info: {stack_trace}")
-
     crash_message = f"{exc_type}_{file_name}_{line_number}_{stack_trace}"
     return crash_message
 
@@ -170,15 +169,17 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    # test_id: 13877
-    # para_0 = torch.randn([1, 9216], dtype=torch.float32)
-    # class dropout(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.dropout(args[0])
-    # verify_model(dropout().float().eval(), input_data=para_0)
-
-    para_0 = torch.randn([19, 19], dtype=torch.float32)
-    class normalize(Module):
+    para_0 = torch.randn([5, 8, 6], dtype=torch.float32)
+    class max_pool2d(Module):
         def forward(self, *args):
-            return torch.nn.functional.normalize(args[0], p=33172276018, )
-    verify_model(normalize().float().eval(), input_data=para_0)
+            return torch.nn.functional.max_pool2d(args[0], kernel_size=3, stride=1, padding=0, dilation=2,
+                                                  ceil_mode=False, )
+    verify_model(max_pool2d().float().eval(), input_data=para_0)
+
+    # para_0 = torch.randn([1, 5, 6, 7], dtype=torch.float32)
+    # para_1 = (3, 6, 5)
+    # class avg_pool3d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
+    # verify_model(avg_pool3d().float().eval(), input_data=para_0)
+

@@ -35,10 +35,11 @@ def extract_crash_message(e):
     file_name, line_number, _, _ = tb[-1]
     file_name = file_name.split("site-packages")[-1]
     exc_type = type(e).__name__
-    stack_trace = str(e).strip().split("\n")[-1]
-    if stack_trace.endswith(':'):
-        stack_trace = stack_trace[:-1]
-    stack_trace = stack_trace.split(':')[-1].strip()
+    # stack_trace = str(e).strip().split("\n")[-1]
+    stack_trace = str(e).split("Summary:")[0].strip().split("\n")[-1]
+    # if stack_trace.endswith(':'):
+    #     stack_trace = stack_trace[:-1]
+    # stack_trace = stack_trace.split(':')[-1].strip()
     pattern = r"[\[\(].*?[\]\)]"
     stack_trace = re.sub(pattern, "", stack_trace)
     print(f">>>>>>>>>>>>>>>>>>>Bug Info: {stack_trace}")
