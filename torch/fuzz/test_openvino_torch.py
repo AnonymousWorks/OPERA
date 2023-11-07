@@ -169,12 +169,12 @@ def compile_torch(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    para_0 = torch.randn([5, 8, 6], dtype=torch.float32)
-    class max_pool2d(Module):
-        def forward(self, *args):
-            return torch.nn.functional.max_pool2d(args[0], kernel_size=3, stride=1, padding=0, dilation=2,
-                                                  ceil_mode=False, )
-    verify_model(max_pool2d().float().eval(), input_data=para_0)
+    # para_0 = torch.randn([5, 8, 6], dtype=torch.float32)
+    # class max_pool2d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.max_pool2d(args[0], kernel_size=3, stride=1, padding=0, dilation=2,
+    #                                               ceil_mode=False, )
+    # verify_model(max_pool2d().float().eval(), input_data=para_0)
 
     # para_0 = torch.randn([1, 5, 6, 7], dtype=torch.float32)
     # para_1 = (3, 6, 5)
@@ -183,3 +183,8 @@ if __name__ == '__main__':
     #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
     # verify_model(avg_pool3d().float().eval(), input_data=para_0)
 
+    para_0 = torch.randn([1, 2, 3], dtype=torch.float32)
+    class lp_pool1d(Module):
+        def forward(self, *args):
+            return torch.nn.functional.lp_pool1d(args[0], norm_type=1.5, kernel_size=1)
+    verify_model(lp_pool1d().float().eval(), input_data=para_0)
