@@ -1,8 +1,7 @@
 import torch.nn.utils.prune
-
+import inspect
 from decorate_func import decorate_function
 from decorate_cls import decorate_class
-import inspect
 
 
 def hijack(obj, func_name_str, mode=""):
@@ -34,14 +33,6 @@ def hijack(obj, func_name_str, mode=""):
     setattr(module_obj, func_name, wrapped_func)
 
 
-#with open(__file__.replace("__init__.py", "torch.txt"), "r") as f1:
-#    lines = f1.readlines()
-#    skipped = ["enable_grad", "get_default_dtype", "load", "tensor", "no_grad", "jit"]
-#    for l in lines:
-#        l = l.strip()
-#        if l not in skipped:
-#            hijack(torch, l, mode="function")
-
 with open(__file__.replace("__init__.py", "torch.nn.txt"), "r") as f2:
     lines = f2.readlines()
     for l in lines:
@@ -49,8 +40,8 @@ with open(__file__.replace("__init__.py", "torch.nn.txt"), "r") as f2:
         hijack(torch, l)
 
 
-#with open(__file__.replace("__init__.py", "torch.nn.functional.txt"), "r") as f3:
-#    lines = f3.readlines()
-#    for l in lines:
-#        l = l.strip()
-#        hijack(torch, l, "function")
+with open(__file__.replace("__init__.py", "torch.nn.functional.txt"), "r") as f3:
+   lines = f3.readlines()
+   for l in lines:
+       l = l.strip()
+       hijack(torch, l, "function")

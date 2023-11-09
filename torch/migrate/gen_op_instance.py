@@ -1,4 +1,5 @@
 import random
+random.seed(20231122)
 
 
 def input_dict2data(input_dict):
@@ -80,14 +81,13 @@ def gen_fun_call_func(api, para):
     params_list_fill_str_kv = ""
     params_list_no_key = []
 
-    for k, v in para.items():  # 参数要先解析只有value的，最后在解析k=v. e.g., (2, 3,4 , p=1.4, threshold=0.1)
+    for k, v in para.items():  # parse value first, the parse the dict k=v. e.g., (2, 3,4 , p=1.4, threshold=0.1)
         if k.startswith("parameter:"):
             param_id = k.split("parameter:")[-1]
             params_list_no_key.append(int(param_id))
 
             if v == 'torchTensor':  # skip the test case, because, we cannot get the shape for the tensor.
                 return None
-
             if isinstance(v, dict) and len(v) == 2 and 'shape' in v.keys() and 'dtype' in v.keys():  # tensor
                 tensor_v = input_dict2data(v)
                 params_list_declare_str += f"para_{param_id} = {tensor_v}\n"
@@ -100,7 +100,6 @@ def gen_fun_call_func(api, para):
                         params_list_declare_str += f"'{v}'\n"
                 else:
                     params_list_declare_str += f"{v}\n"
-
         elif k == 'input_signature':
             input_signature = v
         elif k == 'output_signature':
@@ -115,6 +114,7 @@ def gen_fun_call_func(api, para):
             if isinstance(v, str):
                 params_list_fill_str_kv += f"{k}='{v}',"
             else:
+                print(f"[ERROR] in Line-116(gen_op_instance.py). key is {k}, value is: {v}, Type of v is {type(v)}.")
                 params_list_fill_str_kv += f"{k}={v},"
 
     sorted_params_list_no_key = sorted(params_list_no_key)
@@ -131,26 +131,10 @@ def gen_fun_call_func(api, para):
     clazz_template += f"    def forward(self, *args):\n"
     clazz_template += f"        return {api}(args[0], {params_list_fill_str})\n"
     clazz_template += f"verify_model({api_name}().float().eval(), input_data=para_0)\n\n"
-
     return clazz_template
 
 
-# all_api_call = []
-
-
-"""
-import torch
-from torch.nn import Module
-from test_tvm import verify_model
-from numpy import inf
-import datetime
-starttime = datetime.datetime.now()
-
-def tensor(x):
-    return x
-"""
-
-def write_fn(func_name, params, input_signature, output_signature):
+def record_op(func_name, params, input_signature, output_signature, output_file):
     params = dict(params)
     out_fname = "torch." + func_name
     params['input_signature'] = input_signature
@@ -161,15 +145,14 @@ def write_fn(func_name, params, input_signature, output_signature):
     else:
         api_call = gen_fun_call_cls(out_fname, params)
 
-    # global all_api_call
-    from execute_all_unit_test import GlobalVar
+    from .utils import GlobalVar
     all_api_call = GlobalVar.all_api_call
 
     if api_call not in all_api_call:
         count = GlobalVar.count
         GlobalVar.add_count()
 
-        with open('./migrate_torch_tc.py', 'a') as f:
+        with open(output_file, 'a') as f:
             f.write(f"# test_id: {count} \n{api_call}\n")
             # all_api_call.append(api_call)
             GlobalVar.add_call(api_call)

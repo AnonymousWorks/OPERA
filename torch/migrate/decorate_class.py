@@ -1,7 +1,8 @@
 import json
-from gen_op_instance import write_fn
+from .gen_op_instance import record_op
 
-def decorate_class(klass, hint):
+
+def decorate_class(klass, hint, output_file):
     if not hasattr(klass, '__call__'):
         return klass
     old_init = klass.__init__
@@ -24,7 +25,7 @@ def decorate_class(klass, hint):
                         elif isinstance(vi, tuple) or isinstance(vi, list):
                             res2 = []
                             for vii in vi:
-                                if (hasattr(vii, 'shape')):
+                                if hasattr(vii, 'shape'):
                                     res2.append(get_var_signature(vii))
                             res.append(res2)
                     return res
@@ -102,7 +103,7 @@ def decorate_class(klass, hint):
         input_signature = get_signature_for_tensors(inputs)
         outputs = old_call(self, *inputs, **kwargs)
         output_signature = get_signature_for_tensors(outputs)
-        write_fn(hint, dict(init_params), input_signature, output_signature)
+        record_op(hint, dict(init_params), input_signature, output_signature, output_file)
         return outputs
 
     klass.__init__ = new_init

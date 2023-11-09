@@ -23,19 +23,6 @@ print("Finish all, time consuming(min): ", (endtime - starttime).seconds/60)
 """
 
 
-class GlobalVar:
-    count = 0
-    all_api_call = []
-
-    @staticmethod
-    def add_count():
-        GlobalVar.count += 1
-
-    @staticmethod
-    def add_call(api_call_str):
-        GlobalVar.all_api_call.append(api_call_str)
-
-
 def collect_all_test_files(test_dir):
     py_files = []
     for dir_path, dir_names, filenames in os.walk(test_dir):

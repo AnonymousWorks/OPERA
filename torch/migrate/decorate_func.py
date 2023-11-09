@@ -1,10 +1,9 @@
 from functools import wraps
 import json
-import os
-from gen_op_instance import write_fn
+from .gen_op_instance import record_op
 
 
-def decorate_function(func, hint):
+def decorate_function(func, hint, output_file):
     @wraps(func)
     def wrapper(*args, **kwargs):
         def json_serialize(v):
@@ -14,9 +13,8 @@ def decorate_function(func, hint):
                 return v  # v is a int, float, list, ...
             except Exception as e:
                 if hasattr(v, 'shape'):  # v numpy array
-                    return get_var_signature(
-                        v)  # A dict of signature {'shape':..., 'type':...}
-                if hasattr(v, '__name__'):  #  v is a function
+                    return get_var_signature(v)  # A dict of signature {'shape':..., 'type':...}
+                if hasattr(v, '__name__'):  # v is a function
                     return v.__name__
                 elif hasattr(v, '__class__'):  # v is a class
                     res = []
@@ -27,7 +25,7 @@ def decorate_function(func, hint):
                             elif isinstance(vi, tuple) or isinstance(vi, list):
                                 res2 = []
                                 for vii in vi:
-                                    if (hasattr(vii, 'shape')):
+                                    if hasattr(vii, 'shape'):
                                         res2.append(get_var_signature(vii))
                                 res.append(res2)
                         return res
@@ -76,12 +74,12 @@ def decorate_function(func, hint):
                 except Exception as e:
                     print(e.message)
 
-        def get_shape_for_tensors(t):
-            if isinstance(t, list):
-                input_shape = [get_var_shape(i) for i in t]
-            else:
-                input_shape = get_var_shape(t)
-            return input_shape
+        # def get_shape_for_tensors(t):
+        #     if isinstance(t, list):
+        #         input_shape = [get_var_shape(i) for i in t]
+        #     else:
+        #         input_shape = get_var_shape(t)
+        #     return input_shape
 
         def get_var_signature(var):
             s = dict()
@@ -99,7 +97,7 @@ def decorate_function(func, hint):
         outputs = func(*args, **kwargs)
         output_signature = get_signature_for_tensors(outputs)
         param_dict = build_param_dict(*args, **kwargs)
-        write_fn(hint, param_dict, None, output_signature)
+        record_op(hint, param_dict, None, output_signature, output_file)
         return outputs
 
     if not callable(func):
