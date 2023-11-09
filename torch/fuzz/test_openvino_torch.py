@@ -182,9 +182,10 @@ if __name__ == '__main__':
     #     def forward(self, *args):
     #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
     # verify_model(avg_pool3d().float().eval(), input_data=para_0)
-
-    para_0 = torch.randn([1, 2, 3], dtype=torch.float32)
-    class lp_pool1d(Module):
+    para_0 = torch.randn([1, 6, 51], dtype=torch.float32)
+    para_1 = (13, 13)
+    para_2 = 'constant'
+    class pad(Module):
         def forward(self, *args):
-            return torch.nn.functional.lp_pool1d(args[0], norm_type=1.5, kernel_size=1)
-    verify_model(lp_pool1d().float().eval(), input_data=para_0)
+            return torch.nn.functional.pad(args[0], para_1, para_2, )
+    verify_model(pad().float().eval(), input_data=para_0)

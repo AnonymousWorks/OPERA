@@ -97,6 +97,8 @@ def gen_fun_call_func(api, para):
                     if v.startswith('torch.nn.'):
                         params_list_declare_str += f"{v}\n"
                     else:
+                        if len(v) >= 30:  # wrong/meaningless string.
+                            v = ''
                         params_list_declare_str += f"'{v}'\n"
                 else:
                     params_list_declare_str += f"{v}\n"
