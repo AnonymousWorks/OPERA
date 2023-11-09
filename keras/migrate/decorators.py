@@ -41,7 +41,7 @@ def dump_signature_of_class(klass, class_name, output_file):  # ignore the class
         # print("input tensor: ", inputs)
         outputs = old_call(self, *inputs, **kwargs)
         output_signature = get_signature_for_tensors(outputs)
-        class_name = self.__class__.__module__ + '.' + self.__class__.__name__, "incorrect class name"
+        class_name = self.__class__.__module__ + '.' + self.__class__.__name__
         record_op(class_name, init_params, input_signature, output_signature, output_file=output_file)
         print("new_call:", self.__class__.__name__, init_params)
         return outputs

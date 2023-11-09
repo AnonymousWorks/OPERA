@@ -65,7 +65,11 @@ def gen_fun_call(api, para):
     temp_api = api.split('.')
     if len(temp_api) <= 4:
         return None
-    api_name = f"keras.{temp_api[4]}.{temp_api[-1]}"
+    if 'src' in api:  # high tf version  e.g., keras.src.layers.activation.relu.ReLU
+        api_name = f"keras.{temp_api[2]}.{temp_api[-1]}"
+    else:  # low tf version e.g., tensorflow.python.keras.layers.advanced_activations.Softmax
+        api_name = f"keras.{temp_api[3]}.{temp_api[-1]}"
+
     input_dim = 4
     if '1D' in api_name:
         input_dim = 3
@@ -143,7 +147,7 @@ count = 0
 
 
 def record_op(func_name, params, input_signature, output_signature, output_file):
-    out_fname = f"tf.{func_name}"
+    # out_fname = f"tf.{func_name}"
     # print('debug', out_fname)
     if 'initializers' in func_name or 'engine' in func_name or 'OpLambda' in func_name or 'test' in func_name:
         return
@@ -159,7 +163,7 @@ def record_op(func_name, params, input_signature, output_signature, output_file)
     params['output_signature'] = output_signature
     # print('debug:', out_fname, params)
 
-    api_call = gen_fun_call(out_fname, params)
+    api_call = gen_fun_call(func_name, params)
     if api_call:
         global count, all_api_call
         count += 1
