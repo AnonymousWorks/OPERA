@@ -1,5 +1,5 @@
 import json
-from write_tools import write_fn
+from gen_op_instance import write_fn
 
 def decorate_class(klass, hint):
     if not hasattr(klass, '__call__'):

@@ -1,11 +1,8 @@
-from tensorflow.instrumentation.signature_handler import SignatureHandler
-from tensorflow.instrumentation.write_tools import write_fn
-import os
-import json
+from functools import wraps
+from tensorflow.migrate.signature_handler import SignatureHandler
+from tensorflow.migrate.gen_op_instance import record_op
 sighdl = SignatureHandler()
 
-def isiterable(t):
-    return isinstance(t, list) or isinstance(t, tuple)
 
 def get_signature_for_tensors(t):
     return sighdl.get_var_signature(t)
@@ -16,21 +13,18 @@ def build_param_dict(*args, **kwargs):
     for ind, arg in enumerate(args):
         param_dict['parameter:%d' % ind] = sighdl.get_var_signature(arg)
     for key, value in kwargs.items():
-        if key == 'name': continue
-        param_dict[key] = sighdl.get_var_signature(value)
+        if key != 'name':
+            param_dict[key] = sighdl.get_var_signature(value)
     param_dict = dict(param_dict)
     return param_dict
 
 
-
-
-def dump_signature_of_class(klass, class_name, output_dir):
+def dump_signature_of_class(klass, class_name, output_file):  # ignore the class_name
     if not hasattr(klass, '__call__'):
         return klass
     old_init = klass.__init__
     old_call = klass.__call__
     init_params = dict()
-
 
     def new_init(self, *args, **kwargs):
         nonlocal init_params
@@ -44,32 +38,26 @@ def dump_signature_of_class(klass, class_name, output_dir):
         nonlocal init_params
 
         input_signature = get_signature_for_tensors(inputs)
-        #print(1111111111, inputs)
+        # print("input tensor: ", inputs)
         outputs = old_call(self, *inputs, **kwargs)
         output_signature = get_signature_for_tensors(outputs)
-        write_fn(self.__class__.__module__ + '.' + self.__class__.__name__, init_params, input_signature,
-                 output_signature)
-        print("new_call:",self.__class__.__name__, init_params)
+        class_name = self.__class__.__module__ + '.' + self.__class__.__name__, "incorrect class name"
+        record_op(class_name, init_params, input_signature, output_signature, output_file=output_file)
+        print("new_call:", self.__class__.__name__, init_params)
         return outputs
 
     klass.__init__ = new_init
     klass.__call__ = new_call
     return klass
 
-from functools import wraps
 
-
-def dump_signature_of_function(func, hint, output_dir):
+def dump_signature_of_function(func, hint, output_file):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        import json
-        import os
-
-
         outputs = func(*args, **kwargs)
         output_signature = get_signature_for_tensors(outputs)
         param_dict = build_param_dict(*args, **kwargs)
-        write_fn(hint, param_dict, None, output_signature)
+        record_op(hint, param_dict, None, output_signature, output_file=output_file)
         return outputs
 
     if not callable(func):

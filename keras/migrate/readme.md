@@ -1,20 +1,22 @@
 # Instrumentation 
 
-This folder contains code to perform instrumentation on TensorFlow in order to collect dynamic execution information.
+This folder contains code to perform instrumentation on Keras in order to collect operator call information.
 
-We hook the invocation of `1900` TensorFlow APIs, and the API names are listed in `api_list.txt`.
+We hook the invocation of `145` Keras operators, and the operator API names are listed in `operator_list.txt`.
 
 The key function is `def hijack(output_dir)` in `hijack.py`, where `output_dir` represents the path that all the traced information will be saved to.
 
 ## Usage:
 
-(1) Copy the folder `instrumentation` to the root directory where TensorFlow is installed. For example, if TensorFlow is installed with `virtualenv`, then just copy it to `site-packages/tensorflow/instrumentation/`.
+(1) Copy the folder `migrate` to the root directory where TensorFlow/Keras is installed, 
+such as `site-packages/tensorflow/migrate/`.
 
 (2) Append these lines to the `site-packages/tensorflow/__init__.py`.
 
 ```
-from tensorflow.instrumentation.hijack import hijack
-hijack()
+from tensorflow.migrate.hijack import hijack
+hijack("keras_migrated_tc.py")
 ```
 
-Then we execute the code collected in the first stage to trace various dynamic execution information for each API invocation. The outputs will be stored in the directory `signature_db`.
+Then we execute the all collected test cases to trace the dynamic execution information for each operator call. 
+The outputs will be stored in the directory.

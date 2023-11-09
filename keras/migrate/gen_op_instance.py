@@ -24,7 +24,7 @@ def get_tensor_shape(input_dict, input_dim=4):
                         for sub_item in elem['value']:
                             input_shape.append(sub_item['shape'] if 'shape' in sub_item.keys() else random.randint(1, 4))
                     else:
-                        print("debug1:", input_dict)
+                        print("[debug] input_dict:", input_dict)
                         input_shape = default_shape
                     # parse input_dtype
                     if 'dtype' in elem.keys():
@@ -40,10 +40,10 @@ def get_tensor_shape(input_dict, input_dim=4):
             elif elem['Label'] == 'other' and elem['type'] == "<class 'NoneType'>":
                 input_shape.append(random.randint(1, 4))
             else:
-                print("debug 2", input_dict)
+                print("[debug2] input_dict:", input_dict)
 
         if len(input_shape) == 0:
-            print("debug 3", input_dict)
+            print("[debug3] input_dict:", input_dict)
             input_shape = default_shape
 
     elif label == 'tensor':
@@ -55,7 +55,7 @@ def get_tensor_shape(input_dict, input_dim=4):
         if 'shape' in input_dict.keys():
             input_shape = input_dict['shape']
         else:
-            print("fuck", input_dict)
+            print("[debug4] input_dict:", input_dict)
             input_shape = default_shape
 
     return list(input_shape), input_dtype
@@ -91,7 +91,7 @@ def gen_fun_call(api, para):
             continue
         elif k == 'input_signature':
             input_signature = v
-            # print('>>>>>>>>>>>>>>>> input signature', v)
+            # print('>>>>>> input signature', v)
         elif k == 'output_signature':
             output_signature = v
             pass
@@ -133,7 +133,8 @@ def gen_fun_call(api, para):
     clazz_template += f"args=({params_list_no_key_str}),"
     clazz_template += "kwargs={" + params_list_fill_str_kv + "},"
     clazz_template += f"input_shape={input_shape},input_dtype='{input_dtype}',)"
-    #clazz_template += f"input_shape={input_shape},)"  # input_dtype='{input_dtype}'
+    # for some corner case:
+    clazz_template = clazz_template.replace(":false,", ":False,").replace(":true,", ":True,")
     return clazz_template
 
 
@@ -141,16 +142,17 @@ all_api_call = []
 count = 0
 
 
-def write_fn(func_name, params, input_signature, output_signature):
-    out_fname = "tf." + func_name
+def record_op(func_name, params, input_signature, output_signature, output_file):
+    out_fname = f"tf.{func_name}"
     # print('debug', out_fname)
     if 'initializers' in func_name or 'engine' in func_name or 'OpLambda' in func_name or 'test' in func_name:
         return
     skip_op_list = ['BasicRNNCell', 'ResidualWrapper', 'DeviceWrapper', 'RandomFourierFeatures', 'DropoutWrapper',
-                    'PeepholeLSTMCell', 'IndexLookup', 'Reduction', 'CategoryCrossing', 'InstanceMethod', 'ClassMethod',
+                    'PeepholeLSTMCell', 'IndexLookup', 'Reduction', 'InstanceMethod', 'ClassMethod',
                     'premade', 'legacy_tf_layers', 'CustomLayerWithConfig', 'distribute']
     if func_name.split('.')[-1] in skip_op_list or 'optimizer_v2' in func_name:
         return
+
     params = dict(params)
     if input_signature:
         params['input_signature'] = input_signature
@@ -158,17 +160,10 @@ def write_fn(func_name, params, input_signature, output_signature):
     # print('debug:', out_fname, params)
 
     api_call = gen_fun_call(out_fname, params)
-    # save_file_name = "new_borrow_all_test"
-    save_file_name = "docter_keras_tests"
     if api_call:
-        api_call = api_call.replace(":false,", ":False,").replace(":true,", ":True,")
-        global count
+        global count, all_api_call
         count += 1
-        #with open(f'{save_file_name}.py', 'a') as f:
-        #    f.write(f"{api_call}\n")
-
-        global all_api_call
         if api_call not in all_api_call:  # only save the deduplicate api_call
             all_api_call.append(api_call)
-            with open(f'{save_file_name}_deduplicate.py', 'a', encoding='utf-8') as deduplicate_f:
+            with open(output_file, 'a', encoding='utf-8') as deduplicate_f:
                 deduplicate_f.write(f"{api_call}\n")

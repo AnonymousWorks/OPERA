@@ -30,3 +30,5 @@ output_key = compiled_model.outputs
 for i, output in enumerate(output_key):
     ov_output = compiled_model(input_data)[output]
     np.testing.assert_allclose(onnx_output[i], ov_output, atol=1e-3)
+
+# [] https://github.com/openvinotoolkit/openvino/issues/20976

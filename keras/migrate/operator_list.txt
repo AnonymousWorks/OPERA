@@ -16,10 +16,8 @@ tf.keras.activations.swish
 tf.keras.activations.tanh
 tf.keras.experimental.CosineDecay
 tf.keras.experimental.CosineDecayRestarts
-tf.keras.experimental.LinearCosineDecay
 tf.keras.experimental.LinearModel
 tf.keras.experimental.NoisyLinearCosineDecay
-tf.keras.experimental.PeepholeLSTMCell
 tf.keras.experimental.SequenceFeatures
 tf.keras.experimental.WideDeepModel
 tf.keras.layers.AbstractRNNCell
@@ -129,9 +127,7 @@ tf.keras.layers.concatenate
 tf.keras.layers.deserialize
 tf.keras.layers.dot
 tf.keras.layers.experimental.EinsumDense
-tf.keras.layers.experimental.RandomFourierFeatures
 tf.keras.layers.experimental.SyncBatchNormalization
-tf.keras.layers.experimental.preprocessing.CategoryCrossing
 tf.keras.layers.experimental.preprocessing.CategoryEncoding
 tf.keras.layers.experimental.preprocessing.CenterCrop
 tf.keras.layers.experimental.preprocessing.Discretization
@@ -139,14 +135,6 @@ tf.keras.layers.experimental.preprocessing.Hashing
 tf.keras.layers.experimental.preprocessing.IntegerLookup
 tf.keras.layers.experimental.preprocessing.Normalization
 tf.keras.layers.experimental.preprocessing.PreprocessingLayer
-tf.keras.layers.experimental.preprocessing.RandomContrast
-tf.keras.layers.experimental.preprocessing.RandomCrop
-tf.keras.layers.experimental.preprocessing.RandomFlip
-tf.keras.layers.experimental.preprocessing.RandomHeight
-tf.keras.layers.experimental.preprocessing.RandomRotation
-tf.keras.layers.experimental.preprocessing.RandomTranslation
-tf.keras.layers.experimental.preprocessing.RandomWidth
-tf.keras.layers.experimental.preprocessing.RandomZoom
 tf.keras.layers.experimental.preprocessing.Rescaling
 tf.keras.layers.experimental.preprocessing.Resizing
 tf.keras.layers.experimental.preprocessing.StringLookup

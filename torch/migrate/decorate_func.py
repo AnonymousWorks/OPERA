@@ -1,7 +1,7 @@
 from functools import wraps
 import json
 import os
-from write_tools import write_fn
+from gen_op_instance import write_fn
 
 
 def decorate_function(func, hint):
