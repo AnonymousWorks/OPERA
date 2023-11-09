@@ -9,7 +9,7 @@ The key function is `def hijack(output_file)` in `hijack.py`, where `output_file
 ## Usage:
 
 (1) Copy the folder `migrate` to the root directory where PyTorch is installed, 
-such as `site-packages/tensorflow/migrate/`.
+such as `site-packages/torch/migrate/`.
 
 (2) Append these lines to the `site-packages/torch/__init__.py`.
 

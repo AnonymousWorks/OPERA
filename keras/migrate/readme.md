@@ -9,13 +9,13 @@ The key function is `def hijack(output_file)` in `hijack.py`, where `output_file
 ## Usage:
 
 (1) Copy the folder `migrate` to the root directory where TensorFlow/Keras is installed, 
-such as `site-packages/torch/migrate/`.
+such as `site-packages/tensorflow/migrate/`.
 (2) Append these lines to the `site-packages/tensorflow/__init__.py`.
 
 
 ```
-from torch.migrate.hijack import hijack
-hijack("torch_migrated_tc.py")
+from tensorflow.migrate.hijack import hijack
+hijack("keras_migrated_tc.py")
 ```
 
 Then we execute the all collected test cases to trace the dynamic execution information for each operator call. 

@@ -211,6 +211,7 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
 if __name__ == '__main__':
     # pass
     # layer_test(keras.layers.ZeroPadding2D,args=(),kwargs={'padding':[4, 2],'data_format':"channels_last",},input_shape=[None, 112, 112, 96],input_dtype='float32',)
-    layer_test(keras.layers.Activation, kwargs={'activation': "relu", }, input_shape=[1, 2, 3, 4], )
-    layer_test(keras.layers.GlobalAveragePooling1D,args=(),kwargs={},input_shape=[12, 2, 11],input_dtype='uint8',)
+    # layer_test(keras.layers.Activation, kwargs={'activation': "relu", }, input_shape=[1, 2, 3, 4], )
+    # layer_test(keras.layers.GlobalAveragePooling1D,args=(),kwargs={},input_shape=[12, 2, 11],input_dtype='uint8',)
+    layer_test(keras.merging.Add,args=(),kwargs={},input_shape=[4, 4, 2],input_dtype='float32',)
 
