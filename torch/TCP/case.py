@@ -20,7 +20,7 @@ class TC:
 
         self.parse_test()
 
-    def __init__(self, tc_id, test_cmd_str, layer, all_para_info, abstract_tc, encode):#for torch
+    def __init__(self, tc_id, test_cmd_str, layer, all_para_info, abstract_tc, encode): #for torch
         self.id = tc_id
         self.test_cmd_str = test_cmd_str
         self.is_valid = True

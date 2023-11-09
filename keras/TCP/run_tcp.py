@@ -112,6 +112,6 @@ if __name__ == '__main__':
     tvm_tc_dict = load_tc_from_file(tvm_equipped_test_file).all_tc
     mid = time.time()
     print(f'load time: {(mid - start)} s')
-    save_test_file = "ranked_tc_keras_tvm.py"
+    save_test_file = "ranked_tc_keras_.py"
     run_tcp(mitigated_tc_dict, tvm_tc_dict, max_instance_number=100, save_file=save_test_file)
     print(f'all time: {(time.time() - start)} s')
