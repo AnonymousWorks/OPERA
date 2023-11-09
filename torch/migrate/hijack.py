@@ -35,7 +35,7 @@ def hijack_api(obj, func_name_str, mode, output_file):
 
 
 def hijack(output_file):
-    with open(__file__.replace("__init__.py", "operator_list.txt"), "r") as f2:
+    with open(__file__.replace("hijack.py", "operator_list.txt"), "r") as f2:
         lines = f2.readlines()
         for api in lines:
             api = api.strip()
@@ -43,3 +43,4 @@ def hijack(output_file):
                 hijack_api(torch, api, "function", output_file=output_file)
             else:
                 hijack_api(torch, api, "", output_file=output_file)
+    print(f"finish instrumentation for total {len(lines)} operators")
