@@ -22,6 +22,7 @@
             output_dtypes.append(TensorProto.DataType.Name(parse_type(output.type)))
         op_type = graph.node[0].op_type
         attributes = {}
+        import onnx
         for attr in graph.node[0].attribute:
             if attr.type == AttributeProto.TENSOR:
                 attributes[attr.name] = str(onnx.numpy_helper.to_array(attr.t))
@@ -58,7 +59,8 @@
         return function_call
 
     function_call = extract_parameters(graph)
-    file_path = "saved_file_path"
+    file_path = "onnx_migrated_tc"
+    import os
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             lines = file.readlines()
