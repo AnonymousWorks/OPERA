@@ -1,3 +1,4 @@
+import torch
 import random
 random.seed(20231122)
 
@@ -23,6 +24,9 @@ def input_dict2data(input_dict):
     elif input_dtype == 'torch.bool':
         return f"torch.randint(0, 2, {input_shape}).bool()"
     else:
+        # [tensor(1), tensor(2), tensor(3), tensor(4)]  -> [1, 2, 3, 4]
+        if isinstance(input_shape, list) and len(input_shape) >= 1 and isinstance(input_shape[0], torch.Tensor):
+            input_shape = [i.item() for i in input_shape]
         return f"torch.randn({input_shape}, dtype={input_dtype})"
 
 
@@ -116,7 +120,6 @@ def gen_fun_call_func(api, para):
             if isinstance(v, str):
                 params_list_fill_str_kv += f"{k}='{v}',"
             else:
-                print(f"[ERROR] in Line-116(gen_op_instance.py). key is {k}, value is: {v}, Type of v is {type(v)}.")
                 params_list_fill_str_kv += f"{k}={v},"
 
     sorted_params_list_no_key = sorted(params_list_no_key)

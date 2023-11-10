@@ -65,7 +65,7 @@ def gen_fun_call(api, para):
     temp_api = api.split('.')
     if len(temp_api) <= 4:
         return None
-    if 'src' in api:  # high tf version  e.g., keras.src.layers.activation.relu.ReLU
+    if 'src.' in api:  # high tf version  e.g., keras.src.layers.activation.relu.ReLU
         api_name = f"keras.{temp_api[2]}.{temp_api[-1]}"
     else:  # low tf version e.g., tensorflow.python.keras.layers.advanced_activations.Softmax
         api_name = f"keras.{temp_api[3]}.{temp_api[-1]}"
@@ -113,6 +113,8 @@ def gen_fun_call(api, para):
             elif v['Label'] == 'other' or v['Label'] == 'tf_object':
                 continue
             elif 'value' in v.keys() and '{"class_name":' in v['value']:
+                continue
+            elif type(v) == dict:
                 continue
             else:
                 params_list_fill_str_kv += f"'{k}':{v['value']}," if 'value' in v.keys() else ''
