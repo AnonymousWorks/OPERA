@@ -118,7 +118,10 @@ def gen_fun_call_func(api, para):
             params_list_no_key.append(0)
         else:  # k = v
             if isinstance(v, str):
-                params_list_fill_str_kv += f"{k}='{v}',"
+                if v == 'torchdtype':
+                    params_list_fill_str_kv += f"{k}=None,"
+                else:
+                    params_list_fill_str_kv += f"{k}='{v}',"
             else:
                 params_list_fill_str_kv += f"{k}={v},"
 
