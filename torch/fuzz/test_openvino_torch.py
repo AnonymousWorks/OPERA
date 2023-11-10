@@ -182,10 +182,13 @@ if __name__ == '__main__':
     #     def forward(self, *args):
     #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
     # verify_model(avg_pool3d().float().eval(), input_data=para_0)
-    para_0 = torch.randn([1, 6, 51], dtype=torch.float32)
-    para_1 = (13, 13)
-    para_2 = 'constant'
-    class pad(Module):
+    para_0 = torch.randn([20, 100], dtype=torch.float32)
+    para_1 = torch.randn([20, 100], dtype=torch.float32)
+    para_2 = 2.0
+    para_3 = 1e-06
+    para_4 = True
+    class pairwise_distance(Module):
         def forward(self, *args):
-            return torch.nn.functional.pad(args[0], para_1, para_2, )
-    verify_model(pad().float().eval(), input_data=para_0)
+            return torch.nn.functional.pairwise_distance(args[0], para_1, para_2, para_3, para_4, )
+
+    verify_model(pairwise_distance().float().eval(), input_data=para_0)

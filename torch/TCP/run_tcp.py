@@ -109,10 +109,10 @@ if __name__ == '__main__':
     origin_test_file = "../data/combined_source_torch_test_64756.py"
     mitigated_tc_dict = preprocess_torch_test(origin_test_file)
 
-    tvm_equipped_test_file = "../data/_tvm_torch_all_test.py"
+    tvm_equipped_test_file = "../data/_ov_torch_all_test.py"
     tvm_tc_dict = preprocess_torch_test(tvm_equipped_test_file).all_tc
     mid = time.time()
-    save_test_file = "ranked_tc_torch_temp.py"
+    save_test_file = "ranked_tc_torch_ov.py"
     run_tcp(mitigated_tc_dict, tvm_tc_dict, max_instance_number=100, save_file=save_test_file)
     print(f'load time: {(mid - start)} s')
     print(f'all time: {(time.time() - start)} s')

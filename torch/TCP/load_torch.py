@@ -35,7 +35,16 @@ def get_default_args_dict_torch_func(func_name):
         default_args['input_shape'] = 'no_default'
         default_args = dict(reversed(default_args.items()))
         return default_args
-
+    elif func_name == 'torch.nn.functional.pairwise_distance':
+        default_args['x1'] = 'no_default'
+        default_args['x2'] = 'no_default'
+        default_args['p'] = 2.0
+        default_args['eps'] = 1e-6
+        default_args['keepdim'] = False
+        default_args['input_dtype'] = 'no_default'
+        default_args['input_shape'] = 'no_default'
+        default_args = dict(reversed(default_args.items()))
+        return default_args
     try:
         signature = inspect.signature(eval(func_name))
     except Exception as e:
@@ -346,7 +355,6 @@ def preprocess_torch_test(test_file):
                 default_args_dict = case.all_layer_default_args_dict[layer]
 
             # let each test case have the same para number
-
             processed_args = preprocess_params(default_args_dict, all_para_info)
             # print(f'DEBUG processed_args {processed_args}')
             # print('>>> default_args_dict:', default_args_dict)
@@ -380,7 +388,6 @@ def preprocess_params(default_dict: dict, collected_dict: dict):
     # import pdb;pdb.set_trace()
     # change the default_dict according to the collected real_para_value.
     ordered_key_list = list(default_dict.keys())
-
     for k, v in collected_dict.items():
         if k.startswith("para_"):
             para_id = int(k.split("para_")[-1]) + 1  # [warning] change it when add new attribute.
@@ -403,5 +410,7 @@ def preprocess_params(default_dict: dict, collected_dict: dict):
 
 
 if __name__ == '__main__':
-    for i, layer in enumerate(preprocess_torch_test(test_file="../data/combined_source_torch_test_64756.py").all_tc.keys()):
+    # for i, layer in enumerate(preprocess_torch_test(test_file="../data/combined_source_torch_test_64756.py").all_tc.keys()):
+    #     print(i, layer)
+    for i, layer in enumerate(preprocess_torch_test(test_file="../data/_ov_torch_all_test.py").all_tc.keys()):
         print(i, layer)

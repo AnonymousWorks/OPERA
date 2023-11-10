@@ -3,9 +3,9 @@ from TCP.utils import is_correct_api, get_default_args_dict, preprocess_params
 
 all_layer_default_args_dict = {}  # {op1:{para1: v1, para2:v2 ...}...}
 
+
 def update_all_alyer_default_args_dict(default_args_dict: dict):
     all_layer_default_args_dict.update(default_args_dict)
-
 
 
 class TC:
@@ -31,6 +31,7 @@ class TC:
 
     def __lt__(self, other):
         return self.layer < other.layer
+
     def parse_test(self):
         # layer_test(keras.layers.Dense,args=(),kwargs={'units':32,},input_shape=[3, 784],input_dtype='float32',)
         print(f'{"-" * 20}\n>>> Test case {self.id}: ', self.test_cmd_str.strip())

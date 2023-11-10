@@ -1,6 +1,5 @@
 import inspect
 import copy
-from tensorflow import keras
 import torch
 
 
@@ -67,4 +66,6 @@ if __name__ == '__main__':
     import numpy
 
     res = is_correct_api('numpy.random.rand')
+    print(res)
+    res = get_default_args_dict(torch.nn.functional.relu6)
     print(res)
