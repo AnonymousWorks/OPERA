@@ -104,14 +104,16 @@ def load_tc_from_file(tc_file_name):
 
 
 if __name__ == '__main__':
-    start = time.time()
+    SUT = "ov"  # tvm, trt
     origin_test_file = "../data/combined_sources_keras_test_41986.py"
-    mitigated_tc_dict = load_tc_from_file(origin_test_file)
+    SUT_equipped_test_file = f"../data/_{SUT}_keras_all_test.py"
+    save_test_file = f"ranked_tc_keras_{SUT}.py"
 
-    tvm_equipped_test_file = "../data/_ov_keras_all_test.py"
-    tvm_tc_dict = load_tc_from_file(tvm_equipped_test_file).all_tc
+    start = time.time()
+    mitigated_tc_dict = load_tc_from_file(origin_test_file)
+    SUT_tc_dict = load_tc_from_file(SUT_equipped_test_file).all_tc
     mid = time.time()
+
+    run_tcp(mitigated_tc_dict, SUT_tc_dict, max_instance_number=100, save_file=save_test_file)
     print(f'load time: {(mid - start)} s')
-    save_test_file = "ranked_tc_keras_ov.py"
-    run_tcp(mitigated_tc_dict, tvm_tc_dict, max_instance_number=100, save_file=save_test_file)
     print(f'all time: {(time.time() - start)} s')
