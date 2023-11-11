@@ -54,6 +54,7 @@
         params['kwargs'] = attributes
         if str(op_type) == 'SequenceInsert':
             print('debug', params)
+        if str(op_type) == 'Constant' and attributes['value']
 
         function_call = "make_graph(op_type='{op_type}', kwargs={kwargs}, input_name={input_name}, input_shape={input_shape}, input_dtype={input_dtype}, output_name={output_name}, output_shape={output_shape}, output_dtype={output_dtype})".format(**params)
         return function_call
