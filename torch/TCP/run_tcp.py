@@ -105,7 +105,6 @@ def load_tc_from_file(tc_file_name):
 
 if __name__ == '__main__':
     SUT = "ov"  # ov, tvm, trt
-
     origin_test_file = "../data/combined_source_torch_test_64756.py"
     SUT_equipped_test_file = f"../data/_{SUT}_torch_all_test.py"
     save_test_file = f"ranked_tc_torch_{SUT}.py"

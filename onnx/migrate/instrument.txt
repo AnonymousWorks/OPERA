@@ -59,7 +59,7 @@
         return function_call
 
     function_call = extract_parameters(graph)
-    file_path = "onnx_migrated_tc"
+    file_path = "onnx_migrated_tc.py"
     import os
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
