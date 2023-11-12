@@ -412,5 +412,5 @@ def preprocess_params(default_dict: dict, collected_dict: dict):
 if __name__ == '__main__':
     # for i, layer in enumerate(preprocess_torch_test(test_file="../data/combined_source_torch_test_64756.py").all_tc.keys()):
     #     print(i, layer)
-    for i, layer in enumerate(preprocess_torch_test(test_file="../data/_ov_torch_all_test.py").all_tc.keys()):
+    for i, layer in enumerate(preprocess_torch_test(test_file="../data/ov_equipped_torch_tc.py").all_tc.keys()):
         print(i, layer)

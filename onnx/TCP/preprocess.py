@@ -37,7 +37,7 @@ def process_tc_from_file(tc_file_name):
 
 
 if __name__ == '__main__':
-    origin_test_file = "../data/onnx_all_borrow_test.py"
+    origin_test_file = "../data/original_migrated_onnx_tc.py"
     # origin_test_file = "/share_host/TVMFT/BorrowTests/keras/all_borrow_test.py"
     mitigated_tc_dict = process_tc_from_file(origin_test_file)
     print(count)

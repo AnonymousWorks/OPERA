@@ -104,10 +104,11 @@ def load_tc_from_file(tc_file_name):
 
 
 if __name__ == '__main__':
-    SUT = "ov"  # tvm, trt
-    origin_test_file = "../data/combined_sources_keras_test_41986.py"
-    SUT_equipped_test_file = f"../data/_{SUT}_keras_all_test.py"
-    save_test_file = f"ranked_tc_keras_{SUT}.py"
+    front = 'keras'
+    SUT = "tvm"  # ov, tvm, trt
+    origin_test_file = f"../data/original_migrated_{front}_tc.py"
+    SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
+    save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
 
     start = time.time()
     mitigated_tc_dict = load_tc_from_file(origin_test_file)

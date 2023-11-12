@@ -131,9 +131,7 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
 
 if __name__ == '__main__':
     # cd keras/fuzz
-    # python run_fuzz.py ../data/demo.py openvino keras
-    # python run_fuzz.py ../data/demo.py openvino onnx
-    # python run_fuzz.py ../data/combined_sources_keras_test_41986.py tvm keras
+    # python run_fuzz.py ../data/original_migrated_onnx_tc.py openvino onnx
 
     starttime = datetime.datetime.now()
     collected_test_cases_file = sys.argv[1]

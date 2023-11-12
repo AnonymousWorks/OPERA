@@ -58,5 +58,5 @@ if __name__ == '__main__':
     all_tc = re.split(split_pattern, all_lines)
     for tc in all_tc:
         new_tc = correct_tc(tc)
-        with open('combined_source_torch_test_64756.py', 'a') as w:
+        with open('original_migrated_torch_tc.py', 'a') as w:
             w.write(new_tc+"\n\n\n")

@@ -104,10 +104,11 @@ def load_tc_from_file(tc_file_name):
 
 
 if __name__ == '__main__':
-    SUT = "ov"  # ov, tvm, trt
-    origin_test_file = "../data/combined_source_torch_test_64756.py"
-    SUT_equipped_test_file = f"../data/_{SUT}_torch_all_test.py"
-    save_test_file = f"ranked_tc_torch_{SUT}.py"
+    front = 'torch'
+    SUT = "tvm"  # ov, tvm, trt
+    origin_test_file = f"../data/original_migrated_{front}_tc.py"
+    SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
+    save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
 
     start = time.time()
     mitigated_tc_dict = preprocess_torch_test(origin_test_file)

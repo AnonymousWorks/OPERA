@@ -137,7 +137,7 @@ def preprocess_onnx_tc_from_file(tc_file_name):
     return all_test_cases
 
 
-def load_onnx_tc_from_file(tc_file_name):
+def load_tc_from_file(tc_file_name):
     all_test_cases = preprocess_onnx_tc_from_file(tc_file_name)
     tc_dict = TCDict()
     for key, value in all_test_cases.items():
@@ -148,14 +148,15 @@ def load_onnx_tc_from_file(tc_file_name):
 
 
 if __name__ == '__main__':
-    SUT = "ov"  # tvm, trt
-    origin_test_file = "../data/onnx_all_borrow_test.py"
-    SUT_equipped_test_file = f"../data/_{SUT}_onnx_all_test.py"
-    save_test_file = f"ranked_tc_onnx_{SUT}.py"
+    front = 'onnx'
+    SUT = "ov"  # ov, tvm, trt
+    origin_test_file = f"../data/original_migrated_{front}_tc.py"
+    SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
+    save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
 
     start = time.time()
-    mitigated_tc_dict = load_onnx_tc_from_file(origin_test_file)
-    SUT_tc_dict = load_onnx_tc_from_file(SUT_equipped_test_file).all_tc
+    mitigated_tc_dict = load_tc_from_file(origin_test_file)
+    SUT_tc_dict = load_tc_from_file(SUT_equipped_test_file).all_tc
     mid = time.time()
 
     run_tcp(mitigated_tc_dict, SUT_tc_dict, max_instance_number=100, save_file=save_test_file)

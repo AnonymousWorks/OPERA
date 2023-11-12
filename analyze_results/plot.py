@@ -331,8 +331,8 @@ def run_torch():
                baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
 
 
-def run_onnx():
-    all_bugs_file = f"onnx/detected_bugs_tvm.txt"
+def run_onnx(SUT):
+    all_bugs_file = f"onnx/detected_bugs_{SUT}.txt"
     ranked_bugs_file = "onnx/ranked_onnx_tc_4_tvm.py"
 
     # baseline tcp results
@@ -348,6 +348,7 @@ def run_onnx():
 
 
 if __name__ == "__main__":
-    run_keras()
-    # run_torch()
-    # run_onnx()
+    SUT = "ov"  # tvm, ov, trt
+    run_keras(SUT)
+    run_torch(SUT)
+    run_onnx(SUT)
