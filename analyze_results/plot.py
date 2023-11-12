@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plot
-import re
+import numpy as np
 
 
 def get_accumulate_bug_num(bug_line_list, test_case_num):
@@ -173,14 +173,12 @@ def get_random_tcp_res(bug_line_dict, test_num, repeat_time=10):
         ranked_unique_bugs_line_list = []
         ranked_unique_bugs_key_set = set()
 
-    import numpy as np
-
     final_average_unique_bugs_line_list = np.array(final_average_unique_bugs_line_list)
     final_average_unique_bugs_line_list = np.average(
         final_average_unique_bugs_line_list, 0
     )
     final_average_unique_bugs_line_list = list(final_average_unique_bugs_line_list)
-
+    final_average_unique_bugs_line_list = [round(i) for i in final_average_unique_bugs_line_list]
     return final_average_unique_bugs_line_list
 
 
@@ -299,9 +297,12 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
         print(bug)
 
 
-def run_keras():
-    all_bugs_file = f"keras/detected_bugs_tvm.txt"
-    ranked_bugs_file = f"keras/ranked_keras_tc_4_tvm.py"
+def run_keras(SUT):
+    test_case_num = 41986
+
+    all_bugs_file = f"keras/detected_bugs_{SUT}.txt"
+    # ranked_bugs_file = f"keras/ranked_keras_tc_4_tvm.py"
+    ranked_bugs_file = f"../keras/data/ranked_keras_tc_4_{SUT}.py"
 
     # baseline tcp results
     baseline_line_tcp_file = f"keras/line.py"
@@ -310,14 +311,16 @@ def run_keras():
     baseline_delta_branch_tcp_file = f"keras/delta_branch.py"
     baseline_fast_tcp_file = f"keras/fast.py"
 
-    test_case_num = 41986  # 41986
     common_run("keras", all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
                baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
 
 
-def run_torch():
-    all_bugs_file = f"torch/detected_bugs_tvm.txt"
-    ranked_bugs_file = f"torch/ranked_torch_tc_4_tvm.py"
+def run_torch(SUT):
+    test_case_num = 64756
+
+    all_bugs_file = f"torch/detected_bugs_{SUT}.txt"
+    # ranked_bugs_file = f"torch/ranked_torch_tc_4_tvm.py"
+    ranked_bugs_file = f"../torch/data/ranked_torch_tc_4_{SUT}.py"
 
     # baseline tcp results
     baseline_line_tcp_file = f"torch/line.py"
@@ -326,14 +329,15 @@ def run_torch():
     baseline_delta_branch_tcp_file = f"torch/delta_branch.py"
     baseline_fast_tcp_file = f"torch/torch_fast_final.py"
 
-    test_case_num = 64756
     common_run("torch", all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
                baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
 
 
 def run_onnx(SUT):
+    test_case_num = 1013
+
     all_bugs_file = f"onnx/detected_bugs_{SUT}.txt"
-    ranked_bugs_file = "onnx/ranked_onnx_tc_4_tvm.py"
+    ranked_bugs_file = f"../onnx/data/ranked_onnx_tc_4_{SUT}.py"
 
     # baseline tcp results
     baseline_line_tcp_file = f"onnx/line.py"
@@ -342,13 +346,12 @@ def run_onnx(SUT):
     baseline_delta_branch_tcp_file = f"onnx/delta_branch.py"
     baseline_fast_tcp_file = f"onnx/fast_onnx.py"
 
-    test_case_num = 1013
     common_run("onnx", all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
                baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
 
 
 if __name__ == "__main__":
-    SUT = "ov"  # tvm, ov, trt
-    run_keras(SUT)
+    SUT = "tvm"  # tvm, ov, trt
+    # run_keras(SUT)
     run_torch(SUT)
-    run_onnx(SUT)
+    # run_onnx(SUT)
