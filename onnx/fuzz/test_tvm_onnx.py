@@ -285,8 +285,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
     except AssertionError as e:
         print(f'[bug in tvm] using test: {op_type}; id= {count}')
         print(e)
-        crash_message = extract_crash_message(e)
-        record_bug(count, 'wrong results', op_type, crash_message=crash_message)
+        record_bug(count, 'wrong results', op_type, crash_message="wrong results")
     else:
         print("[success] This test case passed!")
 

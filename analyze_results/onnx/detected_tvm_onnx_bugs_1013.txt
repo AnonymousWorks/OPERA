@@ -23,8 +23,8 @@
 530	crash	MaxPool	AssertionError_python/tvm/relay/frontend/onnx.py_7117_Number of output mismatch 2 vs 1 in MaxPool.
 321	crash	Constant	AttributeError_python/tvm/relay/frontend/onnx.py_3463_module 'tvm' has no attribute 'errors'
 283	crash	CumSum	AssertionError_python/tvm/relay/frontend/common.py_545_All inputs to infer must be available in params.
-9	wrong results	SequenceConstruct	AssertionError_3/envs/tflite/lib/python3.8/site-packages/numpy/testing/_private/utils.py_844_array, dtype=float32)
+9	wrong results	SequenceConstruct	wrong results
 427	crash	If	ValueError: Cannot parse attribute: name: "type"
 822	crash	SequenceInsert	TypeError: object of type 'Var' has no len()
 788	crash	Scan	TVMError: Check failed: (func) is false: Expected the operator to be a global var, but got relay.Let
-924	wrong results	Split	AssertionError_3/envs/tflite/lib/python3.8/site-packages/numpy/testing/_private/utils.py_844_array,
+924	wrong results	Split	wrong results

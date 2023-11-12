@@ -336,7 +336,7 @@ def run_torch():
 
 def run_onnx():
     all_bugs_file = f"./onnx/combined_sources_onnx_bugs_1013.txt"
-    ranked_bugs_file = "onnx/onnx_ranked_test_case_new_final.py"
+    ranked_bugs_file = "onnx/ranked_onnx_tc_4_tvm.py"
 
     # baseline tcp results
     baseline_line_tcp_file = f"onnx/line.py"

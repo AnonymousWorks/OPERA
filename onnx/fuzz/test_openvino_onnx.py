@@ -171,6 +171,7 @@ def make_sub_graph(string):
     )
     return graph_def
 
+
 def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_name, output_shape, output_dtype, count=0, **unused_kwargs):
     print(count)
     try:
@@ -289,8 +290,7 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
     except AssertionError as e:
         print(f'[Bug in DLC] using test: {op_type}; id= {count}')
         print(e)
-        crash_message = extract_crash_message(e)
-        record_bug(count, 'wrong results', op_type, crash_message=crash_message)
+        record_bug(count, 'wrong results', op_type, crash_message="wrong results")
     else:
         print("[success] This test case passed!")
 
@@ -348,7 +348,3 @@ if __name__ == '__main__':
     make_graph(op_type='SoftmaxCrossEntropyLoss', kwargs={'reduction': b'none'}, input_name=('x', 'y', 'w'),
                input_shape=([3, 5], [3], [5]), input_dtype=('FLOAT', 'INT64', 'FLOAT'), output_name=('z',),
                output_shape=([3],), output_dtype=('FLOAT',))
-
-
-
-
