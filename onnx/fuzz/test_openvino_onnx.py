@@ -54,7 +54,7 @@ def extract_crash_message(e):
 def record_bug(bug_id, bug_type, op, crash_message=''):
     bug_info_str = f"{bug_id}\t{bug_type}\t{op}\t{crash_message}\n"
 
-    with open("detected_bugs_ov.txt", 'a', encoding='utf-8') as f:
+    with open("../data/detected_bugs_ov.txt", 'a', encoding='utf-8') as f:
         f.write(bug_info_str)
 
 onnx_dtype_mapping = {
@@ -351,6 +351,6 @@ if __name__ == '__main__':
     #            output_shape=([3],), output_dtype=('FLOAT',))
     # make_graph(op_type='BlackmanWindow', kwargs={}, input_name=('x',), input_shape=([],), input_dtype=('INT32',),
     #            output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
-    # make_graph(op_type='ReduceL1', kwargs={'keepdims': 0}, input_name=('data', 'axes'), input_shape=([3, 2, 2], [1]),
-    #            input_dtype=('FLOAT', 'INT64'), output_name=('reduced',), output_shape=([3, 2],),
-    #            output_dtype=('FLOAT',))
+    make_graph(op_type='ReduceL1', kwargs={'keepdims': 0}, input_name=('data', 'axes'), input_shape=([3, 2, 2], [1]),
+               input_dtype=('FLOAT', 'INT64'), output_name=('reduced',), output_shape=([3, 2],),
+               output_dtype=('FLOAT',))
