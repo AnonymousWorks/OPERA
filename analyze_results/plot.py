@@ -300,7 +300,7 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
 
 
 def run_keras():
-    all_bugs_file = f"keras/detected_tvm_keras_bugs_41986.txt"
+    all_bugs_file = f"keras/detected_bugs_tvm.txt"
     ranked_bugs_file = f"keras/ranked_keras_tc_4_tvm.py"
 
     # baseline tcp results
@@ -316,7 +316,7 @@ def run_keras():
 
 
 def run_torch():
-    all_bugs_file = f"torch/detected_tvm_torch_bugs_64756.txt"
+    all_bugs_file = f"torch/detected_bugs_tvm.txt"
     ranked_bugs_file = f"torch/ranked_torch_tc_4_tvm.py"
 
     # baseline tcp results
@@ -332,7 +332,7 @@ def run_torch():
 
 
 def run_onnx():
-    all_bugs_file = f"onnx/detected_tvm_onnx_bugs_1013.txt"
+    all_bugs_file = f"onnx/detected_bugs_tvm.txt"
     ranked_bugs_file = "onnx/ranked_onnx_tc_4_tvm.py"
 
     # baseline tcp results

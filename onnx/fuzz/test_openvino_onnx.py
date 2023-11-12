@@ -269,12 +269,13 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
     except Exception as e:
         print("[onnx error]", e)
         return
+    dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
     try:
         input_dtype_dlc = [dlc_dtype_mapping[dtype] for dtype in input_dtype]
         dlc_output = compile_onnx(count, onnx_model, input_shape, input_data)
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
-            print("[Warning] trigger an unsupported behavior")
+            print(f"[Warning] trigger an unsupported behavior:{e}")
         else:
             print(f'[Bug in DLC] using test: {op_type}; id= {count}')
             print(e)
@@ -345,6 +346,11 @@ if __name__ == '__main__':
                # input_dtype=('INT64', 'INT64'), output_name=('z',), output_shape=([6],), output_dtype=('INT64',))
     # make_graph(op_type='Shape', kwargs={'start': -1}, input_name=('x',), input_shape=([3, 4, 5],),
     #            input_dtype=('FLOAT',), output_name=('y',), output_shape=([1],), output_dtype=('INT64',))
-    make_graph(op_type='SoftmaxCrossEntropyLoss', kwargs={'reduction': b'none'}, input_name=('x', 'y', 'w'),
-               input_shape=([3, 5], [3], [5]), input_dtype=('FLOAT', 'INT64', 'FLOAT'), output_name=('z',),
-               output_shape=([3],), output_dtype=('FLOAT',))
+    # make_graph(op_type='SoftmaxCrossEntropyLoss', kwargs={'reduction': b'none'}, input_name=('x', 'y', 'w'),
+    #            input_shape=([3, 5], [3], [5]), input_dtype=('FLOAT', 'INT64', 'FLOAT'), output_name=('z',),
+    #            output_shape=([3],), output_dtype=('FLOAT',))
+    # make_graph(op_type='BlackmanWindow', kwargs={}, input_name=('x',), input_shape=([],), input_dtype=('INT32',),
+    #            output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
+    # make_graph(op_type='ReduceL1', kwargs={'keepdims': 0}, input_name=('data', 'axes'), input_shape=([3, 2, 2], [1]),
+    #            input_dtype=('FLOAT', 'INT64'), output_name=('reduced',), output_shape=([3, 2],),
+    #            output_dtype=('FLOAT',))
