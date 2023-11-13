@@ -16,14 +16,16 @@ def compile_torch(model, input_data):
     result = compiled_model(input_data)[output_key]
     return result
 
-input_data = torch.randn([1, 2, 3], dtype=torch.float32)
+input_data = torch.randint(1, 10, [1, 2, 4, 5], dtype=torch.int64)
+weight = torch.randint(1, 10, [2, 2, 2, 3], dtype=torch.int64)
+bias = torch.randint(1, 10, [4], dtype=torch.int64)
 
 
-class lp_pool1d(Module):
+class conv_transpose2d(Module):
     def forward(self, *args):
-        return torch.nn.functional.lp_pool1d(args[0], norm_type=1.5, kernel_size=1)
+        return torch.nn.functional.conv_transpose2d(args[0], weight, bias, groups=2)
 
-torch_model = lp_pool1d().float().eval()
+torch_model = conv_transpose2d().float().eval()
 torch_outputs = torch_model(input_data).cpu().numpy()
 
 trace = torch.jit.trace(torch_model, input_data)
@@ -33,4 +35,4 @@ input_shapes = input_data.shape
 res_ov = compile_torch(trace, input_data)
 np.testing.assert_allclose(torch_outputs, res_ov, rtol=1e-3, atol=1e-3)
 
-# []
+# [https://github.com/openvinotoolkit/openvino/issues/21040]

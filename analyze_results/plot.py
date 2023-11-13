@@ -76,7 +76,7 @@ def run_parse(bugs_file):
         # print(bug_info)
         if "wrong results" == bug_type:
             bug_key = f"{op},wrong results".strip()
-            if op in ["RandomUniformLike", "Bernoulli"]:  # False positive
+            if op in ["Bernoulli"] or "Random" in op:  # False positive
                 continue
         if "unknown type object" in bug_key:
             continue
@@ -98,12 +98,12 @@ def run_parse(bugs_file):
             bug_key = "is expected to be float32"
         elif "Do not know how to handle type" in bug_key:
             bug_key = "Do not know how to handle type"
+        elif "0 is out of bounds for axis 0 with size 0" in bug_key:  # ov-torch input check
+            bug_key = "0 is out of bounds for axis 0 with size 0"
         elif "Cropping2D" == op and "is invalid for axis=" in bug_info:
             continue  # this is a bug in keras. new keras version fixed it.
-        elif (
-            "t argument must be a string, a bytes-like object or a number," in bug_info
-        ):
-            continue  # this is a false positive, 'return_runtime' attribute is not a valid attribute. it just for testing.
+        elif "t argument must be a string, a bytes-like object or a number," in bug_info:
+            continue  # this is a FP: 'return_runtime' attribute is not valid.
 
         elif (
             "exceeds maximum of" in bug_info
@@ -301,7 +301,6 @@ def run_keras(SUT):
     test_case_num = 41986
 
     all_bugs_file = f"keras/detected_bugs_{SUT}.txt"
-    # ranked_bugs_file = f"keras/ranked_keras_tc_4_tvm.py"
     ranked_bugs_file = f"../keras/data/ranked_keras_tc_4_{SUT}.py"
 
     # baseline tcp results
@@ -319,7 +318,6 @@ def run_torch(SUT):
     test_case_num = 64756
 
     all_bugs_file = f"torch/detected_bugs_{SUT}.txt"
-    # ranked_bugs_file = f"torch/ranked_torch_tc_4_tvm.py"
     ranked_bugs_file = f"../torch/data/ranked_torch_tc_4_{SUT}.py"
 
     # baseline tcp results
@@ -351,7 +349,7 @@ def run_onnx(SUT):
 
 
 if __name__ == "__main__":
-    SUT = "tvm"  # tvm, ov, trt
+    SUT = "ov"  # tvm, ov, trt
     # run_keras(SUT)
     run_torch(SUT)
     # run_onnx(SUT)

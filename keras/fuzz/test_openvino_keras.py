@@ -214,4 +214,5 @@ if __name__ == '__main__':
     # layer_test(keras.layers.Activation, kwargs={'activation': "relu", }, input_shape=[1, 2, 3, 4], )
     # layer_test(keras.layers.GlobalAveragePooling1D,args=(),kwargs={},input_shape=[12, 2, 11],input_dtype='uint8',)
     # layer_test(keras.layers.ReLU, args=(), kwargs={}, input_shape=[None, 4, 8, 3, 2], input_dtype='float32', )
-    layer_test(keras.layers.Attention,args=(),kwargs={'dropout':0.8,'use_scale':False,'score_mode':"dot",},input_shape=[2, 1, 4],input_dtype='float32',)
+    # layer_test(keras.layers.Attention,args=(),kwargs={'dropout':0.8,'use_scale':False,'score_mode':"dot",},input_shape=[2, 1, 4],input_dtype='float32',)
+    layer_test(keras.layers.RepeatVector, args=(2,), kwargs={}, input_shape=[3, 1], input_dtype='float32')
