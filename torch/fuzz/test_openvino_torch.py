@@ -182,14 +182,14 @@ if __name__ == '__main__':
     #     def forward(self, *args):
     #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
     # verify_model(avg_pool3d().float().eval(), input_data=para_0)
+
     # test_id: 33161
-    para_0 = torch.randn([1, 2, 2, 3], dtype=torch.float32)
-
-    class normalize(Module):
+    para_0 = torch.randint(1, 10, [9, 16, 13], dtype=torch.int64)
+    class avg_pool1d(Module):
         def forward(self, *args):
-            return torch.nn.functional.normalize(args[0], p=928351651, )
+            return torch.nn.functional.avg_pool1d(args[0], kernel_size=12)
 
-    verify_model(normalize().float().eval(), input_data=para_0)
+    verify_model(avg_pool1d().float().eval(), input_data=para_0)
 
 
 

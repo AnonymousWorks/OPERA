@@ -32,5 +32,6 @@ trace = torch.jit.freeze(trace)
 input_shapes = input_data.shape
 res_ov = compile_torch(trace, input_data)
 
-# []
+# [] https://github.com/openvinotoolkit/openvino/issues/21068
+
 
