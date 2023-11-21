@@ -87,8 +87,6 @@ def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ran
             out_f.write(test.test_cmd_str.strip()[:-2] + f', count={line_cnt},)\n')
 
 
-
-
 def load_tc_from_file(tc_file_name):
     tc_dict = TCDict()
     with open(tc_file_name, 'r', encoding='utf-8') as intput_f:
@@ -105,7 +103,7 @@ def load_tc_from_file(tc_file_name):
 
 if __name__ == '__main__':
     front = 'keras'
-    SUT = "tvm"  # ov, tvm, trt
+    SUT = "ov"  # ov, tvm, trt
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"

@@ -255,7 +255,8 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         for name, shape, dtype in zip(input_name, input_shape, input_dtype_onnx):
             input_data[name] = assign_input_data(shape, dtype)
             if op_type == 'ConstantOfShape':
-                input_data[name] = output_shape[0]
+                input_data[name] = np.array(output_shape[0], dtype=dlc_dtype_mapping[input_dtype[0]])
+
             elif op_type == 'Split':
                 if name == 'split':
                     split_value = np.squeeze(np.concatenate(output_shape))
@@ -333,7 +334,7 @@ def compile_onnx(cnt, model, input_shapes, input_data):
 
 
 if __name__ == '__main__':
-    # make_graph(op_type='Constant', kwargs={'value': '0.4'}, input_name=('x',), input_shape=([1],), input_dtype=('INT32',), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
+    # make_graph(op_type='Constant', kwargs={'value': '0.4'}, input_name=(), input_shape=(), input_dtype=(), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
     # make_graph(op_type='LayerNormalization', kwargs={'axis': -1}, input_name=('X', 'W', 'B'), input_shape=([3, 4], [4], [4]), input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('Y', 'Mean', 'InvStdDev'), output_shape=([3, 4], [3, 1], [3, 1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT'))
     # make_graph(op_type='ConvTranspose', kwargs={'auto_pad': b'SAME_UPPER', 'strides': [2, 2]}, input_name=('X', 'W'), input_shape=([1, 1, 3, 3], [1, 2, 3, 3]), input_dtype=('FLOAT', 'FLOAT'), output_name=('Y',), output_shape=([1, 2, 6, 6],), output_dtype=('FLOAT',))
     # make_graph(op_type='ReverseSequence', kwargs={'batch_axis': 1, 'time_axis': 0}, input_name=('x', 'sequence_lens'),
@@ -351,6 +352,25 @@ if __name__ == '__main__':
     #            output_shape=([3],), output_dtype=('FLOAT',))
     # make_graph(op_type='BlackmanWindow', kwargs={}, input_name=('x',), input_shape=([],), input_dtype=('INT32',),
     #            output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
-    make_graph(op_type='ReduceL1', kwargs={'keepdims': 0}, input_name=('data', 'axes'), input_shape=([3, 2, 2], [1]),
-               input_dtype=('FLOAT', 'INT64'), output_name=('reduced',), output_shape=([3, 2],),
+    # make_graph(op_type='ReduceL1', kwargs={'keepdims': 0}, input_name=('data', 'axes'), input_shape=([3, 2, 2], [1]),
+    #            input_dtype=('FLOAT', 'INT64'), output_name=('reduced',), output_shape=([3, 2],),
+    #            output_dtype=('FLOAT',))
+    # make_graph(op_type='Trilu', kwargs={}, input_name=('x', 'k'), input_shape=([4, 5], []), input_dtype=('INT64', 'INT64'), output_name=('y',), output_shape=([4, 5],), output_dtype=('INT64',))
+    # make_graph(op_type='Constant', kwargs={'value_float': "0.1"}, input_name=(), input_shape=(),
+    #            input_dtype=(), output_name=('y',), output_shape=([10],), output_dtype=('FLOAT',))
+    # make_graph(op_type='ConstantOfShape', kwargs={}, input_name=('x',), input_shape=([3],), input_dtype=('INT64',), output_name=('y',), output_shape=([4, 3, 2],), output_dtype=('FLOAT',))
+    # make_graph(op_type='Bernoulli', kwargs={}, input_name=('x',), input_shape=([10],), input_dtype=('DOUBLE',), output_name=('y',), output_shape=([10],), output_dtype=('DOUBLE',))
+    # make_graph(op_type='RandomUniformLike', kwargs={'dtype': 11}, input_name=('x',),
+    #            input_shape=([10],), input_dtype=('DOUBLE',), output_name=('y',), output_shape=([10],),
+    #            output_dtype=('DOUBLE',))
+    # make_graph(op_type='Split', kwargs={'num_outputs': 4}, input_name=('input',), input_shape=([7],),
+    #            input_dtype=('FLOAT',), output_name=('output_1', 'output_2', 'output_3', 'output_4'),
+    #            output_shape=([2], [2], [2], [1]), output_dtype=('FLOAT', 'FLOAT', 'FLOAT', 'FLOAT'))
+    # make_graph(op_type='Pad', kwargs={'mode': b'constant'}, input_name=('x', 'pads'),
+    #            input_shape=([1, 3, 4, 5], [8]), input_dtype=('FLOAT', 'INT64'), output_name=('y',),
+    #            output_shape=([1, 3, 7, 12],), output_dtype=('FLOAT',))
+    make_graph(op_type='Range', kwargs={}, input_name=('start', 'limit', 'delta'), input_shape=([1], [1], [1]),
+               input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('output',), output_shape=([2],),
                output_dtype=('FLOAT',))
+
+

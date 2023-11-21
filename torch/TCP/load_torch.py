@@ -19,11 +19,24 @@ def get_default_args_dict_torch_func(func_name):
         default_args['input_shape'] = 'no_default'
         default_args = dict(reversed(default_args.items()))
         return default_args
-    if func_name == 'torch.nn.functional.pad':
+    elif func_name == 'torch.nn.functional.pad':
         default_args['input'] = 'no_default'
         default_args['pad'] = 'no_default'
         default_args['mode'] = 'constant'
         default_args['value'] = None
+        default_args['input_dtype'] = 'no_default'
+        default_args['input_shape'] = 'no_default'
+        default_args = dict(reversed(default_args.items()))
+        return default_args
+    elif func_name == 'torch.nn.functional.conv_transpose2d':
+        default_args['input'] = 'no_default'
+        default_args['weight'] = 'no_default'
+        default_args['bias'] = None
+        default_args['stride'] = 1
+        default_args['padding'] = 0
+        default_args['output'] = 0
+        default_args['groups'] = 1
+        default_args['dilation'] = 1
         default_args['input_dtype'] = 'no_default'
         default_args['input_shape'] = 'no_default'
         default_args = dict(reversed(default_args.items()))
@@ -410,7 +423,7 @@ def preprocess_params(default_dict: dict, collected_dict: dict):
 
 
 if __name__ == '__main__':
-    # for i, layer in enumerate(preprocess_torch_test(test_file="../data/combined_source_torch_test_64756.py").all_tc.keys()):
+    # for i, layer in enumerate(preprocess_torch_test(test_file="../data/original_migrated_torch_tc.py").all_tc.keys()):
     #     print(i, layer)
-    for i, layer in enumerate(preprocess_torch_test(test_file="../data/ov_equipped_torch_tc.py").all_tc.keys()):
+    for i, layer in enumerate(preprocess_torch_test(test_file="../data/demo.py").all_tc.keys()):
         print(i, layer)

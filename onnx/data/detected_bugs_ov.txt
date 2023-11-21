@@ -136,4 +136,4 @@
 985	crash	Trilu	RuntimeError_/openvino/frontend/frontend.py_18_Trilu second input must be a scalar
 987	crash	Trilu	RuntimeError_/openvino/frontend/frontend.py_18_Trilu second input must be a scalar
 989	crash	Trilu	RuntimeError_/openvino/frontend/frontend.py_18_Trilu second input must be a scalar
-991	crash	Trilu	RuntimeError_/openvino/frontend/frontend.py_18_Trilu second input must be a scalar
+991	crash	Trilu	RuntimeError_/openvino/frontend/frontend.py_18_Trilu second input must be a scalar0	wrong results	Mod	wrong results

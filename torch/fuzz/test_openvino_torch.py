@@ -183,13 +183,28 @@ if __name__ == '__main__':
     #         return torch.nn.functional.avg_pool3d(args[0], para_1, )
     # verify_model(avg_pool3d().float().eval(), input_data=para_0)
 
-    # test_id: 33161
-    para_0 = torch.randint(1, 10, [9, 16, 13], dtype=torch.int64)
-    class avg_pool1d(Module):
+    # test_id: 38979
+    # para_0 = torch.randint(1, 100, [1, 3, 7, 6], dtype=torch.int64)
+    # para_1 = torch.randint(1, 100, [3, 4, 3, 3], dtype=torch.int64)
+    # para_2 = torch.randint(1, 100, [4], dtype=torch.int64)
+    #
+    # class conv_transpose2d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.conv_transpose2d(args[0], para_1, para_2,)
+    # verify_model(conv_transpose2d().float().eval(), input_data=para_0)
+
+    para_0 = torch.randint(1, 100, [1, 2, 4, 5], dtype=torch.int64)
+    para_1 = torch.randint(1, 100, [2, 2, 2, 3], dtype=torch.int64)
+    para_2 = torch.randint(1, 100, [4], dtype=torch.int64)
+    para_3 = (1, 1)
+    para_4 = (0, 0)
+    para_5 = (0, 0)
+    para_6 = 2
+    para_7 = (1, 1)
+
+    class conv_transpose2d(Module):
         def forward(self, *args):
-            return torch.nn.functional.avg_pool1d(args[0], kernel_size=12)
-
-    verify_model(avg_pool1d().float().eval(), input_data=para_0)
-
-
+            return torch.nn.functional.conv_transpose2d(args[0], para_1, para_2, para_3, para_4, para_5, para_6,
+                                                        para_7, )
+    verify_model(conv_transpose2d().float().eval(), input_data=para_0)
 

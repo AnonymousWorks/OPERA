@@ -197,20 +197,20 @@ class TCDict:
                     self.all_selected_tc_pair[tc.layer][(k1, k2)].append((v1, v2))
             vis[k1] = True
 
-    def rank_layer(self, tvm_equipped_tc_dict=None):
+    def rank_layer(self, SUT_equipped_tc_dict=None):
         '''
         1. rank the layer according to the number of instance for each layer.
         :return:  the smaller for the equipped_div_mitigated_rate, the higher for the priority
         '''
-        if tvm_equipped_tc_dict is None:
+        if SUT_equipped_tc_dict is None:
             self.all_tc = dict(sorted(self.all_tc.items(), key=lambda k_v: len(k_v[1])))
         else:
             equipped_div_mitigated_rate = {}
             for k, v in self.all_tc.items():
-                if k not in tvm_equipped_tc_dict.keys():
+                if k not in SUT_equipped_tc_dict.keys():
                     equipped_div_mitigated_rate[k] = 0
                 else:
-                    equipped_div_mitigated_rate[k] = len(tvm_equipped_tc_dict[k]) / len(v)
+                    equipped_div_mitigated_rate[k] = len(SUT_equipped_tc_dict[k]) / len(v)
             equipped_div_mitigated_rate = dict(
                 sorted(equipped_div_mitigated_rate.items(), key=lambda x: x[1], reverse=True))
             self.all_tc = {key: self.all_tc[key] for key in equipped_div_mitigated_rate.keys()}
@@ -251,8 +251,8 @@ class TCDict:
                     num_diff_param += 1 / len(selected_tc_dict[k])
         if num_para == 0:
             return 0
-        if this_tc_dict['input_dtype'] not in ['torch.float64', 'torch.float32']:
-            return 0
+        # if this_tc_dict['input_dtype'] not in ['torch.float64', 'torch.float32']:
+        #     return 0
         if 'input_shape' in this_tc_dict:
             shape = this_tc_dict['input_shape']
             if isinstance(shape, list):

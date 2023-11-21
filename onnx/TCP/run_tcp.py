@@ -149,7 +149,7 @@ def load_tc_from_file(tc_file_name):
 
 if __name__ == '__main__':
     front = 'onnx'
-    SUT = "ov"  # ov, tvm, trt
+    SUT = "tvm"  # ov, tvm, trt
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"

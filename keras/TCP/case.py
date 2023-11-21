@@ -293,7 +293,11 @@ if __name__ == '__main__':
     all_tc = ''''layer_test(keras.layers.Dropout,args=(0.3,),kwargs={},input_shape=[4, 2],input_dtype='float32',)
 layer_test(keras.layers.Dense,args=(2,),kwargs={},input_shape=[4, 2],input_dtype='float32',)
 layer_test(keras.layers.Dense,args=(10,),kwargs={},input_shape=[None, 3],input_dtype='float32',)
-layer_test(keras.layers.LSTM,args=(),kwargs={},input_shape=[None, None, 6],input_dtype='float32',)'''
+layer_test(keras.layers.LSTM,args=(),kwargs={},input_shape=[None, None, 6],input_dtype='float32',)
+layer_test(keras.layers.Permute,args=(),kwargs={'dims':"",},input_shape=[6],input_dtype='float32',)
+layer_test(keras.layers.RepeatVector,args=(2,),kwargs={},input_shape=[3, 1],input_dtype='float32',)
+layer_test(keras.layers.ReLU,args=(),kwargs={'threshold':8736188279335914365,},input_shape=[20, 20, 5, 1, 6],input_dtype='int8',)
+'''
     tc_dict = TCDict()
     for i, tc in enumerate(all_tc.split('\n')):
         if tc.startswith('layer_test'):

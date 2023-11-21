@@ -195,7 +195,7 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
         disabled=False,
     )
 
-    # compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
+    # compiled_model = core.compile_model(model=model, device_name=GPU)  # CPU,GPU,AUTO
     compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
 
     # show the model structure
@@ -216,3 +216,8 @@ if __name__ == '__main__':
     # layer_test(keras.layers.ReLU, args=(), kwargs={}, input_shape=[None, 4, 8, 3, 2], input_dtype='float32', )
     # layer_test(keras.layers.Attention,args=(),kwargs={'dropout':0.8,'use_scale':False,'score_mode':"dot",},input_shape=[2, 1, 4],input_dtype='float32',)
     layer_test(keras.layers.RepeatVector, args=(2,), kwargs={}, input_shape=[3, 1], input_dtype='float32')
+    # layer_test(keras.layers.UpSampling1D, args=(), kwargs={}, input_shape=[2, 1, 18], input_dtype='float64',
+    #            count=30453)
+    # layer_test(keras.layers.ZeroPadding2D, args=(), kwargs={'padding': [3, 1], 'data_format': "channels_last", },
+    #            input_shape=[None, 150, 150, 144], input_dtype='float32', )
+

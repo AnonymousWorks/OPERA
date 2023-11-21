@@ -6,42 +6,42 @@ from TCP.case import TC, TCDict
 from TCP.load_torch import preprocess_torch_test
 
 
-def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ranked_test_case.py'):
-    tc_dict.rank_layer(tvm_equipped_tc_dict=tvm_equipped_tc_dict)
-    tvm_dict = TCDict()
+def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ranked_test_case.py'):
+    tc_dict.rank_layer(SUT_equipped_tc_dict=SUT_equipped_tc_dict)
+    SUT_dict = TCDict()
     all_dict = TCDict()
     rate = {}
-    for layer, tc_list in tvm_equipped_tc_dict.items():
+    for layer, tc_list in SUT_equipped_tc_dict.items():
         if layer not in tc_dict.all_tc:
             continue
         for tc in tc_list:
             tc_dict.add2selected_tc_dict(tc)
             all_dict.add(tc)
             all_dict.add2selected_tc_dict(tc)
-            tvm_dict.add(tc)
-            tvm_dict.add2selected_tc_dict(tc)
+            SUT_dict.add(tc)
+            SUT_dict.add2selected_tc_dict(tc)
 
     for layer, tc_list in tc_dict.all_tc.items():
         r = 1.0
         for tc in tc_list:
             all_dict.add(tc)
             all_dict.add2selected_tc_dict(tc)
-        if layer in tvm_dict.all_tc.keys():
-            tvm_tc_dict = tvm_dict.all_selected_tc[layer]
+        if layer in SUT_dict.all_tc.keys():
+            SUT_tc_dict = SUT_dict.all_selected_tc[layer]
             all_tc_dict = all_dict.all_selected_tc[layer]
             for key, val in all_tc_dict.items():
-                if key in tvm_tc_dict:
-                    r *= 1.0 * len(tvm_tc_dict[key]) / len(all_tc_dict[key])
+                if key in SUT_tc_dict:
+                    r *= 1.0 * len(SUT_tc_dict[key]) / len(all_tc_dict[key])
                 else:
                     r *= 1.0 / len(all_tc_dict[key])
-            tvm_tc_dict_pair = tvm_dict.all_selected_tc_pair[layer]
+            SUT_tc_dict_pair = SUT_dict.all_selected_tc_pair[layer]
             all_tc_dict_pair = all_dict.all_selected_tc_pair[layer]
             for key, val in all_tc_dict_pair.items():
-                if key in tvm_tc_dict_pair:
-                    r *= 1.0 * len(tvm_tc_dict_pair[key]) / len(all_tc_dict_pair[key])
+                if key in SUT_tc_dict_pair:
+                    r *= 1.0 * len(SUT_tc_dict_pair[key]) / len(all_tc_dict_pair[key])
                 else:
                     r *= 1.0 / len(all_tc_dict_pair[key])
-            print('rate ', layer, tvm_tc_dict, all_tc_dict)
+            print('rate ', layer, SUT_tc_dict, all_tc_dict)
         r = 1.0 - r
         rate[layer] = r
         print(f'{layer} : {r}')
@@ -59,7 +59,6 @@ def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ran
         heapq.heappush(heap, (-rate[layer_name] * max_distance, this_selected_tc))
     will_delete_layer_group = []
     while len(heap) != 0:
-
         max_distance, this_selected_tc = heapq.heappop(heap)
         print(f'{time.time()} {len(heap)} {max_distance}')
         with open(save_file, 'a', encoding='utf-8') as out_f:
@@ -87,7 +86,6 @@ def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ran
         for test in tests:
             line_cnt = test.id
             out_f.write(test.test_cmd_str.strip()[:-2] + f', count={line_cnt},)\n')
-
 
 
 def load_tc_from_file(tc_file_name):

@@ -65,10 +65,10 @@ def run_parse(bugs_file):
     for line in all_bugs:
         bug_line_id, bug_type, op, bug_line = line.split("\t")
         bug_line_id = str(int(bug_line_id))
-        if (
-            op != "Conv3DTranspose"
-        ):  # 'Conv3DTranspose' and 'Conv2DTranspose' are two different bug according to patch.
+        if op != "Conv3DTranspose":  # 'Conv3DTranspose' and 'Conv2DTranspose' are two different bug according to patch.
             op = preprocess_op_name(op)  # rename the op_layer name
+        if "must be evenly divisible by 'num_splits' attribute value" in bug_line:  # deduplicate
+            bug_line = "must be evenly divisible by 'num_splits' attribute value"
         bug_key = f"{op},{bug_line}".strip()
         bug_info = bug_line.split("_")[-1].strip()
         # bug_key = re.sub(r'\d+', '__num__', bug_key)
@@ -76,12 +76,19 @@ def run_parse(bugs_file):
         # print(bug_info)
         if "wrong results" == bug_type:
             bug_key = f"{op},wrong results".strip()
-            if op in ["Bernoulli"] or "Random" in op:  # False positive
+            if op in ["Bernoulli"] or "Random" in op or "Mod" == op:  # False positive due to randomness
                 continue
         if "unknown type object" in bug_key:
             continue
-        if "got multiple values for argument 'axis'" in bug_key and "Reduce" in op:
+        # elif "Random" in op:
+        #     continue
+        elif "got multiple values for argument 'axis'" in bug_key and "Reduce" in op:
             bug_key = "Reduce, TypeError_python/tvm/relay/frontend/common.py_453_sum got multiple values for argument 'axis'"
+        # onnx-ov
+        elif "Demanded batch  doesn't exist" in bug_key:
+            continue
+        elif "Constant" == op:  # and "Port for tensor name" in bug_key:  # no inputs
+            continue
         # end for onnx
 
         # fp in pytorch
@@ -100,11 +107,24 @@ def run_parse(bugs_file):
             bug_key = "Do not know how to handle type"
         elif "0 is out of bounds for axis 0 with size 0" in bug_key:  # ov-torch input check
             bug_key = "0 is out of bounds for axis 0 with size 0"
+        elif "None constant cannot be converted to OpenVINO opset " in bug_key:  # ov-torch duplicate
+            bug_key = "None constant cannot be converted to OpenVINO opset "
+        elif "Expected kernel size to be equal to input size" in bug_key:  # deduplicate
+            bug_key = bug_key.split(". Got:")[0]
+        elif "Node: ##aten::_convolution/" in bug_key:  # deduplicate
+            bug_key = bug_key.split("Node: ##aten::_convolution/")[0]
+        elif "RuntimeError_/openvino/runtime/ie_api.py_543_;" in bug_key:
+            continue
+
+        # deduplicate ov-keras
+        elif "Check 'm_element_type != element::undefined " in bug_key:
+            bug_key = "Check 'm_element_type != element::undefined "
         elif "Cropping2D" == op and "is invalid for axis=" in bug_info:
             continue  # this is a bug in keras. new keras version fixed it.
         elif "t argument must be a string, a bytes-like object or a number," in bug_info:
             continue  # this is a FP: 'return_runtime' attribute is not valid.
-
+        elif "UpSampling2D" == op and "Input element type must be f32, f16, bf16, i8, u8, i64, i32" in bug_info:
+            bug_key = "Input element type must be f32, f16, bf16, i8, u8, i64, i32"
         elif (
             "exceeds maximum of" in bug_info
             or "quant param not found" in bug_info
@@ -190,26 +210,22 @@ def get_ranked_tc_tcp_res(bug_line_dict, ranked_bugs_file):
 
     ranked_id = 1
     for line in all_lines:
-        if (
-            line.startswith("layer_test")
-            or line.startswith("verify_model")
-            or line.startswith("make_graph")
-        ):
+        if line.startswith("layer_test") or line.startswith("verify_model") or line.startswith("make_graph"):
             test_id = line.strip().split("count=")[-1][:-2]
             # print(test_id)
             if test_id in bug_line_dict.keys():
                 bug_info = bug_line_dict[test_id]
                 if bug_info not in ranked_unique_bugs_key_set:
                     ranked_unique_bugs_key_set.add(bug_info)
+                    # print(ranked_id, bug_info)
                     ranked_unique_bugs_line_list.append(int(ranked_id))
-                    if (
-                        "is not valid for operator Dense" in bug_info
-                    ):  # one test case, 2 bugs.
+                    if "is not valid for operator Dense" in bug_info:  # one test case, 2 bugs.
                         ranked_unique_bugs_key_set.add(bug_info + "_2")
                         ranked_unique_bugs_line_list.append(int(ranked_id) + 1)
-                else:
-                    continue
             ranked_id += 1
+        else:
+            # print("[Warning] skip a wrong test case")
+            continue
     return ranked_unique_bugs_line_list, ranked_unique_bugs_key_set
 
 
@@ -221,47 +237,45 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
     all_bugs_line_list, all_bugs_list, all_bug_line_dict = run_parse(all_bugs_file)
 
     cumulative_bug_list = get_accumulate_bug_num(all_bugs_line_list, test_case_num)
+    # print(cumulative_bug_list)
     all_methods_accumulate_bugs_dict["random"] = cumulative_bug_list
 
     print("test cases number which can detect a bug: ", len(all_bug_line_dict))
-    print(
-        "---------------------------------each tcp method--------------------------------------------"
-    )
+    print("---------------------------------each tcp method--------------------------------------------")
     print("\n\nranked tc bugs:...\n")
-    # our_tcp_bugs_line_list, our_tcp_bugs_list, our_tcp_bug_line_dict = run_parse(ranked_bugs_file)
-    our_tcp_bugs_line_list, our_tcp_bugs_list = get_ranked_tc_tcp_res(
-        all_bug_line_dict, ranked_bugs_file
-    )
-    print(f"'{front}_our':", our_tcp_bugs_line_list)
+    our_tcp_bugs_line_list, our_tcp_bugs_list = get_ranked_tc_tcp_res(all_bug_line_dict, ranked_bugs_file)
+    print(f"'{front}_our':{our_tcp_bugs_line_list},")
     # my_plot(our_tcp_bugs_line_list, test_case_num=20000)
     cumulative_bug_list = get_accumulate_bug_num(our_tcp_bugs_line_list, test_case_num)
     all_methods_accumulate_bugs_dict["our"] = cumulative_bug_list
 
     # -------------------------------baseline------------------------------------------------------------
-    average_random_unique_bugs_line_list = get_random_tcp_res(
-        all_bug_line_dict, test_case_num
-    )
-    print(f"'{front}_random':", average_random_unique_bugs_line_list)
+    # baseline: random
+    average_random_unique_bugs_line_list = get_random_tcp_res(all_bug_line_dict, test_case_num)
+    print(f"'{front}_random':{average_random_unique_bugs_line_list},")
+    cumulative_bug_list = get_accumulate_bug_num(average_random_unique_bugs_line_list, test_case_num)
+    all_methods_accumulate_bugs_dict["Random"] = cumulative_bug_list
+
+    # baseline: fast_tcp
+    ranked_unique_bugs_line_list, _ = get_ranked_tc_tcp_res(all_bug_line_dict, baseline_fast_tcp_file)
+    print(f"'{front}_fast':{ranked_unique_bugs_line_list},")
+    cumulative_bug_list = get_accumulate_bug_num(ranked_unique_bugs_line_list, test_case_num)
+    all_methods_accumulate_bugs_dict["FAST"] = cumulative_bug_list
+
     # baseline: line
     ranked_unique_bugs_line_list, ranked_unique_bugs_key_set = get_ranked_tc_tcp_res(
         all_bug_line_dict, baseline_line_tcp_file
     )
-    print(f"'{front}_cov':", ranked_unique_bugs_line_list)
+    print(f"'{front}_cov':{ranked_unique_bugs_line_list},")
     # print(ranked_unique_bugs_line_list)
     # my_plot(ranked_unique_bugs_line_list, test_case_num=20000)
-    cumulative_bug_list = get_accumulate_bug_num(
-        ranked_unique_bugs_line_list, test_case_num
-    )
+    cumulative_bug_list = get_accumulate_bug_num(ranked_unique_bugs_line_list, test_case_num)
     all_methods_accumulate_bugs_dict["line_cov"] = cumulative_bug_list
 
     # baseline: line_delta_cov
-    ranked_unique_bugs_line_list, _ = get_ranked_tc_tcp_res(
-        all_bug_line_dict, baseline_delta_line_tcp_file
-    )
-    print(f"'{front}_delta_cov':", ranked_unique_bugs_line_list)
-    cumulative_bug_list = get_accumulate_bug_num(
-        ranked_unique_bugs_line_list, test_case_num
-    )
+    ranked_unique_bugs_line_list, _ = get_ranked_tc_tcp_res(all_bug_line_dict, baseline_delta_line_tcp_file)
+    print(f"'{front}_delta_cov':{ranked_unique_bugs_line_list},")
+    cumulative_bug_list = get_accumulate_bug_num(ranked_unique_bugs_line_list, test_case_num)
     all_methods_accumulate_bugs_dict["delta_line_cov"] = cumulative_bug_list
 
     # # baseline: branch_cov
@@ -273,16 +287,6 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
     # ranked_unique_bugs_line_list, _ = get_ranked_tc_tcp_res(all_bug_line_dict, baseline_delta_branch_tcp_file)
     # cumulative_bug_list = get_accumulate_bug_num(ranked_unique_bugs_line_list, test_case_num)
     # all_methods_accumulate_bugs_dict['delta_branch_cov'] = cumulative_bug_list
-
-    # baseline: fast_tcp
-    ranked_unique_bugs_line_list, _ = get_ranked_tc_tcp_res(
-        all_bug_line_dict, baseline_fast_tcp_file
-    )
-    print(f"'{front}_fast':", ranked_unique_bugs_line_list)
-    cumulative_bug_list = get_accumulate_bug_num(
-        ranked_unique_bugs_line_list, test_case_num
-    )
-    all_methods_accumulate_bugs_dict["FAST"] = cumulative_bug_list
 
     plot_all(all_methods_accumulate_bugs_dict)
 
@@ -350,6 +354,6 @@ def run_onnx(SUT):
 
 if __name__ == "__main__":
     SUT = "ov"  # tvm, ov, trt
-    # run_keras(SUT)
     run_torch(SUT)
-    # run_onnx(SUT)
+    run_keras(SUT)
+    run_onnx(SUT)
