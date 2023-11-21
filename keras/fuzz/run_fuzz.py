@@ -32,7 +32,7 @@ def run_subprocess(python_program):
     # record the consumed time
     tc_id = python_program.split("test_")[-1][:-3]
     time_consume = (datetime.datetime.now() - this_start_time).seconds
-    with open(f"{frame}_time_record.txt", 'a')as f:
+    with open(f"time_record_{SUT}_{frame}.txt", 'a')as f:
         f.write(f"{tc_id}\t{time_consume}\n")
     return
 

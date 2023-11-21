@@ -136,7 +136,7 @@ bug_position_trt_dict = {
 }
 if __name__ == '__main__':
 
-    SUT_list = ['ov']  # ov, trt
+    SUT_list = ['tvm']  # ov, trt
     for sut in SUT_list:
         bug_position_dict = eval(f"bug_position_{sut}_dict")
         projects = ['torch', 'keras', 'onnx']
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                 test_num = 1013
                 tcp_time = 10
 
-            bug_time_relation = load_time_record(f'{project}_time_record.txt', test_num)
+            bug_time_relation = load_time_record(f'time_record_{sut}_{project}.txt', test_num)
             bug_time_relation = [i+tcp_time for i in bug_time_relation]
 
             # bug_time_relation = [i/3600 for i in bug_time_relation]
