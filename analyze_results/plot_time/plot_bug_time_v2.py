@@ -62,6 +62,19 @@ def plot_all(all_method_res_dict, sut, project, max_time):
             ax.set_xlabel("Time (min)", )  # fontweight='bold')
             ax.set_xlim([-1, 35])
             ax.set_ylim([-1, 18])
+    elif sut == 'ov':
+        if project == "torch":
+            ax.set_xlabel("Time (h)", )  # fontweight='bold')
+            ax.set_xlim([-1, 40])
+            ax.set_ylim([-1, 18])
+        elif project == "keras":
+            ax.set_xlabel("Time (h)", )  # fontweight='bold')
+            ax.set_xlim([-1, 60])
+            ax.set_ylim([-1, 12])
+        elif project == "onnx":
+            ax.set_xlabel("Time (min)", )  # fontweight='bold')
+            ax.set_xlim([-1, 35])
+            ax.set_ylim([-1, 25])
 
     plot.tight_layout()
     plot.legend(loc='lower right', fontsize=20)
