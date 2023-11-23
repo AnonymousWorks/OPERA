@@ -9,25 +9,30 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-def run_subprocess(python_program):
+def run_subprocess(python_program_gpu):
+    python_program, gpu_id = python_program_gpu
     this_start_time = datetime.datetime.now()
     print(f"Execute subprocess: {python_program}")
-    run_flag = subprocess.run(['python', python_program], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    env = dict(os.environ)
+    env['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+    try:
+        run_flag = subprocess.run([f'python', python_program], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=80)
+        if run_flag.returncode == 0:  # run well
+            output = run_flag.stdout.decode('utf-8')
+            output_final = ''
+            for line in output.split("\\n"):
+                output_final += line
+            print(output_final)
+        else:  # invalid test cases
+            err_output = run_flag.stderr.decode('utf-8')
+            output_final = ''
+            for line in err_output.split("\\n"):
+                output_final += line
 
-    if run_flag.returncode == 0:  # run well
-        output = run_flag.stdout.decode('utf-8')
-        output_final = ''
-        for line in output.split("\\n"):
-            output_final += line
-        print(output_final)
-    else:  # invalid test cases
-        err_output = run_flag.stderr.decode('utf-8')
-        output_final = ''
-        for line in err_output.split("\\n"):
-            output_final += line
-
-        print(f">>>> [Warning] Check the test case in file {python_program}")
-        print(output_final)
+            print(f">>>> [Warning] Check the test case in file {python_program}")
+            print(output_final)
+    except subprocess.TimeoutExpired:
+        print(f"[Timeout] for {python_program}, continue...")
 
     # record the consumed time
     tc_id = python_program.split("test_")[-1][:-3]
@@ -121,12 +126,18 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
                 all_test_files.append(tc_file)
 
     # Execute the tests
-    for tc in all_test_files:
-        run_subprocess(tc)
-    # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()//2)
-    # pool.map(run_subprocess, all_test_files)
-    # pool.close()
-    # pool.join()
+    # for tc in all_test_files:
+    #     run_subprocess(tc)
+
+    gpu_num = 8
+    all_test_files_gpu = []
+    for i, file in enumerate(all_test_files):
+        all_test_files_gpu.append((file, i%gpu_num))
+
+    pool = multiprocessing.Pool(processes=2*gpu_num)
+    pool.map(run_subprocess, all_test_files_gpu)
+    pool.close()
+    pool.join()
 
 
 if __name__ == '__main__':

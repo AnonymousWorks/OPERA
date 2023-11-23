@@ -253,12 +253,14 @@ class TCDict:
                     num_diff_param += 1 / len(selected_tc_dict[k])
         if num_para == 0:
             return 0
-        if this_tc_dict['input_dtype'] not in ['float64', 'float32']:
-            return 0
+        supported_dtype = ['float64', 'float32']  # int8 only support for OV
+        supported_dtype_ov = ['float64', 'float32', 'int8', 'int16', 'uint16', 'uint32', 'uint64']
+        # if this_tc_dict['input_dtype'] not in supported_dtype_ov:
+        #     return 0
         if 'input_shape' in this_tc_dict:
             shape = this_tc_dict['input_shape']
             if isinstance(shape, list):
-                if len(shape) >= 5:
+                if len(shape) > 5:
                     return 0
         distance = num_diff_param / num_para
         if len(this_tc_dict) == 1 and 'input_shape' in this_tc_dict:

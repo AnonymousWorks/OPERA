@@ -57,7 +57,7 @@ def preprocess_params(default_dict: dict, collected_dict: dict):
             continue
             # print(f"")  # redundant para for **kwargs
     if 'no_default' in result_dict.values():  # the collected test case lack para value for the undefault para
-        print('[debug] un-default para, ', result_dict)
+        # print('[debug] un-default para, ', result_dict)
         return False
     return result_dict
 

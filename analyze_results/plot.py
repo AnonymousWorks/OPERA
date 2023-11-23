@@ -78,6 +78,9 @@ def run_parse(bugs_file):
             bug_key = f"{op},wrong results".strip()
             if op in ["Bernoulli"] or "Random" in op or "Mod" == op:  # False positive due to randomness
                 continue
+            # in subprocess bug, skip it due to cannot reproduce
+            # elif op in []:
+            #     continue
         if "unknown type object" in bug_key:
             continue
         # elif "Random" in op:
@@ -89,19 +92,16 @@ def run_parse(bugs_file):
             continue
         elif "Constant" == op:  # and "Port for tensor name" in bug_key:  # no inputs
             continue
+        elif "Port for tensor name axes was not found" in bug_key:
+            bug_key = "Port for tensor name axes was not found"
         # end for onnx
 
         # fp in pytorch
         if "avoid ambiguity in the code" in bug_key:
             continue
         # end for pytorch
-        if (
-            "The size must exactly match" in bug_key
-        ):  # in graph, same with "is expected to be float32"
-            bug_key = "is expected to be float32"
-        if (
-            "is expected to be float32" in bug_key
-        ):  # in vm model, same with 'size must exactly match'
+        # same bug in different tvm compile mode (graph vs vm)
+        if "The size must exactly match" in bug_key or "is expected to be float32" in bug_key:  # in graph, same with "is expected to be float32"
             bug_key = "is expected to be float32"
         elif "Do not know how to handle type" in bug_key:
             bug_key = "Do not know how to handle type"
@@ -354,6 +354,6 @@ def run_onnx(SUT):
 
 if __name__ == "__main__":
     SUT = "ov"  # tvm, ov, trt
-    run_torch(SUT)
+    # run_torch(SUT)
     run_keras(SUT)
-    run_onnx(SUT)
+    # run_onnx(SUT)

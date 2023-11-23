@@ -195,8 +195,8 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
         disabled=False,
     )
 
-    # compiled_model = core.compile_model(model=model, device_name=GPU)  # CPU,GPU,AUTO
-    compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
+    compiled_model = core.compile_model(model=model, device_name='CPU')  # CPU,GPU,AUTO
+    # compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
@@ -215,9 +215,17 @@ if __name__ == '__main__':
     # layer_test(keras.layers.GlobalAveragePooling1D,args=(),kwargs={},input_shape=[12, 2, 11],input_dtype='uint8',)
     # layer_test(keras.layers.ReLU, args=(), kwargs={}, input_shape=[None, 4, 8, 3, 2], input_dtype='float32', )
     # layer_test(keras.layers.Attention,args=(),kwargs={'dropout':0.8,'use_scale':False,'score_mode':"dot",},input_shape=[2, 1, 4],input_dtype='float32',)
-    layer_test(keras.layers.RepeatVector, args=(2,), kwargs={}, input_shape=[3, 1], input_dtype='float32')
+    # layer_test(keras.layers.RepeatVector, args=(2,), kwargs={}, input_shape=[3, 1], input_dtype='float32')
     # layer_test(keras.layers.UpSampling1D, args=(), kwargs={}, input_shape=[2, 1, 18], input_dtype='float64',
     #            count=30453)
     # layer_test(keras.layers.ZeroPadding2D, args=(), kwargs={'padding': [3, 1], 'data_format': "channels_last", },
     #            input_shape=[None, 150, 150, 144], input_dtype='float32', )
-
+    # layer_test(keras.layers.Cropping3D,args=(),kwargs={'cropping':[1, 1, 1],'data_format':"channels_last",},input_shape=[2, 8, 8, 8, 2],input_dtype='float32',)
+    # layer_test(keras.layers.ZeroPadding2D, kwargs={'padding': [4, 4], 'data_format': "channels_last", },
+    #            input_shape=[None, 42, 42, 336], )
+    # for i in range(22):
+    #     layer_test(keras.layers.LeakyReLU,args=(),kwargs={'alpha':-5.609126659975927e+37,},input_shape=[15, 20, 9, 1],input_dtype='int16',count=26380,)
+    # layer_test(keras.layers.BatchNormalization, args=(),
+    #            kwargs={'epsilon': -1e+40, }, input_shape=[5, 1, 11, 1], input_dtype='float32', )
+    layer_test(keras.layers.BatchNormalization, args=(), kwargs={},
+               input_shape=[1, 2, 3, 4, 5], input_dtype='float32', )
