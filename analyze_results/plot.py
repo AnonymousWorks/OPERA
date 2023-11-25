@@ -108,8 +108,8 @@ def run_parse(bugs_file):
             continue
         elif "'NoneType' object has no attribute" in bug_key:
             continue
-        # elif "ELU" in bug_key:
-        #     continue
+        elif "Unable to convert ONNX weights" in bug_info:
+            continue
         # trt-torch
 
         # same bug in different tvm compile mode (graph vs vm)
