@@ -104,7 +104,7 @@ def run_parse(bugs_file):
         if "'TRTModule' object has no attribute 'context'" in bug_key:
             # bug_key = "'TRTModule' object has no attribute 'context'"
             continue
-        elif "'Tensor' object has no attribute '_trt'" in bug_key:
+        elif "'Tensor' object has no attribute '_trt'" in bug_key:  # unsupported isssue
             continue
         elif "'NoneType' object has no attribute" in bug_key:
             continue
