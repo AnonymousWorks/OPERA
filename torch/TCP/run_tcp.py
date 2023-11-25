@@ -11,7 +11,9 @@ def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ran
     SUT_dict = TCDict()
     all_dict = TCDict()
     rate = {}
+    # add all equipped test in SUT to the ranked list
     for layer, tc_list in SUT_equipped_tc_dict.items():
+        # skip the test only occur in unit test
         if layer not in tc_dict.all_tc:
             continue
         for tc in tc_list:
@@ -20,8 +22,8 @@ def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ran
             all_dict.add2selected_tc_dict(tc)
             SUT_dict.add(tc)
             SUT_dict.add2selected_tc_dict(tc)
-
-    for layer, tc_list in tc_dict.all_tc.items():
+    #
+    for layer, tc_list in tc_dict.all_tc.items():  # tc_dict.all_tc has ranked by layer
         r = 1.0
         for tc in tc_list:
             all_dict.add(tc)
@@ -34,14 +36,17 @@ def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ran
                     r *= 1.0 * len(SUT_tc_dict[key]) / len(all_tc_dict[key])
                 else:
                     r *= 1.0 / len(all_tc_dict[key])
+            # combination pair score calculate
             SUT_tc_dict_pair = SUT_dict.all_selected_tc_pair[layer]
             all_tc_dict_pair = all_dict.all_selected_tc_pair[layer]
-            for key, val in all_tc_dict_pair.items():
+            for key, val in all_tc_dict_pair.items():  # combination pairs
                 if key in SUT_tc_dict_pair:
                     r *= 1.0 * len(SUT_tc_dict_pair[key]) / len(all_tc_dict_pair[key])
                 else:
                     r *= 1.0 / len(all_tc_dict_pair[key])
             print('rate ', layer, SUT_tc_dict, all_tc_dict)
+        else:
+            r = 0  # Todo[@sqc]: change it latter
         r = 1.0 - r
         rate[layer] = r
         print(f'{layer} : {r}')
@@ -103,8 +108,9 @@ def load_tc_from_file(tc_file_name):
 
 if __name__ == '__main__':
     front = 'torch'
-    SUT = "ov"  # ov, tvm, trt
+    SUT = "trt"  # ov, tvm, trt
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
+    # origin_test_file = f"../data/demo.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
 

@@ -100,6 +100,18 @@ def run_parse(bugs_file):
         if "avoid ambiguity in the code" in bug_key:
             continue
         # end for pytorch
+        # trt-torch
+        if "'TRTModule' object has no attribute 'context'" in bug_key:
+            # bug_key = "'TRTModule' object has no attribute 'context'"
+            continue
+        elif "'Tensor' object has no attribute '_trt'" in bug_key:
+            continue
+        elif "'NoneType' object has no attribute" in bug_key:
+            continue
+        # elif "ELU" in bug_key:
+        #     continue
+        # trt-torch
+
         # same bug in different tvm compile mode (graph vs vm)
         if "The size must exactly match" in bug_key or "is expected to be float32" in bug_key:  # in graph, same with "is expected to be float32"
             bug_key = "is expected to be float32"
@@ -235,10 +247,7 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
     all_methods_accumulate_bugs_dict = {}
     print("all bugs:...\n")
     all_bugs_line_list, all_bugs_list, all_bug_line_dict = run_parse(all_bugs_file)
-
-    cumulative_bug_list = get_accumulate_bug_num(all_bugs_line_list, test_case_num)
-    # print(cumulative_bug_list)
-    all_methods_accumulate_bugs_dict["random"] = cumulative_bug_list
+    # print(all_bugs_line_list)
 
     print("test cases number which can detect a bug: ", len(all_bug_line_dict))
     print("---------------------------------each tcp method--------------------------------------------")
@@ -353,7 +362,7 @@ def run_onnx(SUT):
 
 
 if __name__ == "__main__":
-    SUT = "ov"  # tvm, ov, trt
-    # run_torch(SUT)
-    run_keras(SUT)
+    SUT = "trt"  # tvm, ov, trt
+    run_torch(SUT)
+    # run_keras(SUT)
     # run_onnx(SUT)
