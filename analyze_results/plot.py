@@ -36,10 +36,15 @@ def preprocess_op_name(op_name):
         op_name[0] = op_name[0].upper()
     for i, ch in enumerate(op_name):
         if ch == "_":
-            op_name[i + 1] = op_name[i + 1].upper()
+            # print(op_name)
+            if op_name[-1] == '_':
+                op_name = op_name[:-1]
+            else:
+                op_name[i + 1] = op_name[i + 1].upper()
     op_name = "".join(op_name)
     op_name = (
-        op_name.replace("1d", "2d")
+        op_name
+        .replace("1d", "2d")
         .replace("3d", "2d")
         .replace("1D", "2D")
         .replace("3D", "2D")
@@ -48,13 +53,14 @@ def preprocess_op_name(op_name):
         .replace("MseLoss", "MSELoss")
         .replace("LpPool", "LPPool")
         .replace("Elu", "ELU")
+        .replace("MultilabelSoftMarginLoss", "MultiLabelSoftMarginLoss")
     )
     # .replace('2d', '')
 
     return op_name
 
 
-def run_parse(bugs_file):
+def run_parse(bugs_file, front):
     with open(bugs_file, "r", encoding="utf-8") as bug_f:
         all_bugs = bug_f.readlines()
     all_bugs_line_list = []
@@ -65,8 +71,15 @@ def run_parse(bugs_file):
     for line in all_bugs:
         bug_line_id, bug_type, op, bug_line = line.split("\t")
         bug_line_id = str(int(bug_line_id))
-        if op != "Conv3DTranspose":  # 'Conv3DTranspose' and 'Conv2DTranspose' are two different bug according to patch.
+        bug_line = bug_line.replace("root/miniconda3/envs/nnsmith/lib/python3.9/site-packages/torch2trt-0.4.0-py3.9.egg/", '')
+        if SUT == 'tvm' and op == "Conv3DTranspose":  # 'Conv3DTranspose' and 'Conv2DTranspose' are two different bug according to patch.
+            op = op
+        # according to the converter function in torch2trt converter files
+        elif SUT == 'trt' and front == 'torch' and op in ['MaxPool3d', 'AvgPool3d', 'AdaptiveMaxPool3d', 'AdaptiveAvgPool3d', 'Conv1d', 'Conv3d']:
+            op = op
+        else:
             op = preprocess_op_name(op)  # rename the op_layer name
+
         if "must be evenly divisible by 'num_splits' attribute value" in bug_line:  # deduplicate
             bug_line = "must be evenly divisible by 'num_splits' attribute value"
         bug_key = f"{op},{bug_line}".strip()
@@ -83,12 +96,10 @@ def run_parse(bugs_file):
             #     continue
         if "unknown type object" in bug_key:
             continue
-        # elif "Random" in op:
-        #     continue
         elif "got multiple values for argument 'axis'" in bug_key and "Reduce" in op:
             bug_key = "Reduce, TypeError_python/tvm/relay/frontend/common.py_453_sum got multiple values for argument 'axis'"
         # onnx-ov
-        elif "Demanded batch  doesn't exist" in bug_key:
+        elif "Demanded batch  doesn't exist" in bug_key:  # the double spaces!!
             continue
         elif "Constant" == op:  # and "Port for tensor name" in bug_key:  # no inputs
             continue
@@ -104,12 +115,25 @@ def run_parse(bugs_file):
         if "'TRTModule' object has no attribute 'context'" in bug_key:
             # bug_key = "'TRTModule' object has no attribute 'context'"
             continue
-        elif "'Tensor' object has no attribute '_trt'" in bug_key:  # unsupported isssue
+        elif "object has no attribute '_trt'" in bug_key:  # unsupported isssue
             continue
         elif "'NoneType' object has no attribute" in bug_key:
             continue
         elif "Unable to convert ONNX weights" in bug_info:
             continue
+        elif "factory function returned nullptr" in bug_info:
+            continue  # check it later
+        elif "Transformer" in op and "object is not iterable" in bug_key:  # deduplicate
+            bug_key = "Transformer, 'int' object is not iterable"
+        elif 'Pad' in op and "index out of range" in bug_key:
+            bug_key = "Pad, index out of range"
+            bug_key = "Pad,"+bug_key.split(',')[-1]
+
+        # Pad and reflection_pad_2d are different bugs according to the different converter files
+        elif op in ['Pad', 'ReplicationPad2d', 'ConstantPad2d'] and "wrong results" in bug_key:
+            bug_key = 'Pad, wrong results'
+        # elif op in [ 'GumbelSoftmax', 'ReLU6']:
+        #     continue
         # trt-torch
 
         # same bug in different tvm compile mode (graph vs vm)
@@ -143,14 +167,9 @@ def run_parse(bugs_file):
             or "make uint from negative value" in bug_info
         ):
             continue  # false positive
-        elif "Divide by zero" == bug_info and op in [
-            "InstanceNorm",
-            "InstanceNorm2d",
-            "AdaptiveMaxPool2d",
-        ]:
+        # "Divide by zero", "division or modulo by zero", "division by zero"
+        elif "by zero" in bug_info and op in ["InstanceNorm", "InstanceNorm2d", "AdaptiveMaxPool2d", "AdaptiveMaxPool3d", "Normalize"]:
             continue  # a workaround to fileout the input_shape includes 0
-        elif "division by zero" == bug_info and op == "Normalize":
-            continue
         elif "is expected to be int64" in bug_info:
             continue
         # ---------------------
@@ -246,7 +265,7 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
 
     all_methods_accumulate_bugs_dict = {}
     print("all bugs:...\n")
-    all_bugs_line_list, all_bugs_list, all_bug_line_dict = run_parse(all_bugs_file)
+    all_bugs_line_list, all_bugs_list, all_bug_line_dict = run_parse(all_bugs_file, front)
     # print(all_bugs_line_list)
 
     print("test cases number which can detect a bug: ", len(all_bug_line_dict))
@@ -363,6 +382,6 @@ def run_onnx(SUT):
 
 if __name__ == "__main__":
     SUT = "trt"  # tvm, ov, trt
-    # run_torch(SUT)
+    run_torch(SUT)
     # run_keras(SUT)
-    run_onnx(SUT)
+    # run_onnx(SUT)
