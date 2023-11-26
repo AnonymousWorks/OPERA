@@ -55,7 +55,6 @@ def preprocess_op_name(op_name):
         .replace("Elu", "ELU")
         .replace("MultilabelSoftMarginLoss", "MultiLabelSoftMarginLoss")
     )
-    # .replace('2d', '')
 
     return op_name
 
@@ -75,8 +74,11 @@ def run_parse(bugs_file, front):
         if SUT == 'tvm' and op == "Conv3DTranspose":  # 'Conv3DTranspose' and 'Conv2DTranspose' are two different bug according to patch.
             op = op
         # according to the converter function in torch2trt converter files
-        elif SUT == 'trt' and front == 'torch' and op in ['MaxPool3d', 'AvgPool3d', 'AdaptiveMaxPool3d', 'AdaptiveAvgPool3d', 'Conv1d', 'Conv3d']:
-            op = op
+        elif SUT == 'trt':
+            if front == 'torch' and op in ['MaxPool3d', 'AvgPool3d', 'AdaptiveMaxPool3d', 'AdaptiveAvgPool3d', 'Conv1d', 'Conv3d']:
+                op = op
+            elif op.startswith('Reduce'):
+                op = 'Reduce'
         else:
             op = preprocess_op_name(op)  # rename the op_layer name
 
@@ -96,6 +98,15 @@ def run_parse(bugs_file, front):
             #     continue
         if "unknown type object" in bug_key:
             continue
+
+        # trt-onnx
+        elif 'out of memory' in bug_key:
+            continue
+        elif 'invalid argument' in bug_key:
+            continue
+        # todo: deduplicate bugs in trt-onnx
+        # end trt-onnx
+
         elif "got multiple values for argument 'axis'" in bug_key and "Reduce" in op:
             bug_key = "Reduce, TypeError_python/tvm/relay/frontend/common.py_453_sum got multiple values for argument 'axis'"
         # onnx-ov
@@ -117,7 +128,7 @@ def run_parse(bugs_file, front):
             continue
         elif "object has no attribute '_trt'" in bug_key:  # unsupported isssue
             continue
-        elif "'NoneType' object has no attribute" in bug_key:
+        elif SUT == 'trt' and "'NoneType' object has no attribute" in bug_key:
             continue
         elif "Unable to convert ONNX weights" in bug_info:
             continue
@@ -130,9 +141,9 @@ def run_parse(bugs_file, front):
             bug_key = "Pad,"+bug_key.split(',')[-1]
 
         # Pad and reflection_pad_2d are different bugs according to the different converter files
-        elif op in ['Pad', 'ReplicationPad2d', 'ConstantPad2d'] and "wrong results" in bug_key:
+        elif SUT == 'trt' and op in ['Pad', 'ReplicationPad2d', 'ConstantPad2d'] and "wrong results" in bug_key:
             bug_key = 'Pad, wrong results'
-        # elif op in [ 'GumbelSoftmax', 'ReLU6']:
+        # elif op in ['ScatterElements', 'RoiAlign', 'ReverseSequence']:
         #     continue
         # trt-torch
 
@@ -167,8 +178,10 @@ def run_parse(bugs_file, front):
             or "make uint from negative value" in bug_info
         ):
             continue  # false positive
+        elif SUT == 'tvm' and "Divide by zero" in bug_key and op == 'AdaptiveMaxPool2d':
+            bug_key = "Divide by zero"
         # "Divide by zero", "division or modulo by zero", "division by zero"
-        elif "by zero" in bug_info and op in ["InstanceNorm", "InstanceNorm2d", "AdaptiveMaxPool2d", "AdaptiveMaxPool3d", "Normalize"]:
+        elif "by zero" in bug_info and op in ["InstanceNorm", "InstanceNorm2d", "AdaptiveMaxPool2d", "AdaptiveMaxPool3d", "Normalize", "Interpolate"]:
             continue  # a workaround to fileout the input_shape includes 0
         elif "is expected to be int64" in bug_info:
             continue
@@ -382,6 +395,6 @@ def run_onnx(SUT):
 
 if __name__ == "__main__":
     SUT = "trt"  # tvm, ov, trt
-    run_torch(SUT)
+    # run_torch(SUT)
     # run_keras(SUT)
-    # run_onnx(SUT)
+    run_onnx(SUT)

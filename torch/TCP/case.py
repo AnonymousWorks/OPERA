@@ -216,7 +216,7 @@ class TCDict:
             self.all_tc = {key: self.all_tc[key] for key in equipped_div_mitigated_rate.keys()}
         print("len all_tc", str(len(self.all_tc)))
 
-    def select_instance(self, layer_name):
+    def select_instance(self, layer_name, SUT):
         candidate_instance_list = self.all_tc[layer_name]
         history_selected_instance_dict = self.all_selected_tc[layer_name]
         # if len(history_selected_instance_dict) == 0:  # empty
@@ -230,7 +230,7 @@ class TCDict:
             # print('debug:', self.all_selected_tc[layer_name])
             this_distance = self.calc_distance(this_tc_params,
                                                self.all_selected_tc[layer_name],
-                                               self.all_selected_tc_pair[layer_name])
+                                               self.all_selected_tc_pair[layer_name], SUT)
             # print(f">>>>>>[debug] {this_distance}=== {this_tc_params}<---> {self.all_selected_tc[layer_name]}")
             if max_distance < this_distance:
                 max_distance = this_distance
@@ -238,7 +238,7 @@ class TCDict:
         return max_distance_tc, max_distance
 
     @staticmethod
-    def calc_distance(this_tc_dict: dict, selected_tc_dict: dict, selected_tc_pair: dict):
+    def calc_distance(this_tc_dict: dict, selected_tc_dict: dict, selected_tc_pair: dict, SUT):
         # The larger the distance, the greater the difference
         num_diff_param = 0.0
         num_para = len(this_tc_dict)
@@ -251,7 +251,14 @@ class TCDict:
                     num_diff_param += 1 / len(selected_tc_dict[k])
         if num_para == 0:
             return 0
-        if this_tc_dict['input_dtype'] not in ['torch.float64', 'torch.float32']:
+
+        if SUT in ['tvm', 'trt']:
+            unsupported_type = ['torch.complex128', 'torch.int8', 'torch.int16', 'torch.int32', 'torch.int64',
+                                'torch.uint8', 'torch.float16']
+        elif SUT in ['ov']:
+            unsupported_type = ['torch.complex128']
+
+        if this_tc_dict['input_dtype'] in unsupported_type:
             return 0
         if 'input_shape' in this_tc_dict:
             shape = this_tc_dict['input_shape']

@@ -157,7 +157,6 @@
 15411	crash	AdaptiveAvgPool3d	TVMError_python/tvm/_ffi/_ctypes/packed_func.py_237_relay.Constant]
 12926	wrong results	conv2d	wrong result
 12304	crash	linear	DiagnosticError_python/tvm/_ffi/_ctypes/packed_func.py_237_one or more error diagnostics were emitted, please check diagnostic render for output.
-9819	wrong results	linear	wrong result
 13561	crash	linear	DiagnosticError_python/tvm/_ffi/_ctypes/packed_func.py_237_one or more error diagnostics were emitted, please check diagnostic render for output.
 14804	wrong results	batch_norm	wrong result
 16051	crash	linear	DiagnosticError_python/tvm/_ffi/_ctypes/packed_func.py_237_one or more error diagnostics were emitted, please check diagnostic render for output.
@@ -206,7 +205,6 @@
 19468	wrong results	avg_pool2d	wrong result
 17611	wrong results	conv2d	wrong result
 20100	crash	linear	DiagnosticError_python/tvm/_ffi/_ctypes/packed_func.py_237_one or more error diagnostics were emitted, please check diagnostic render for output.
-23211	wrong results	linear	wrong result
 17622	wrong results	softplus	wrong result
 21981	crash	adaptive_max_pool2d	TVMError_python/tvm/_ffi/_ctypes/packed_func.py_237_relay.Constant]
 20742	crash	ConvTranspose1d	TVMError_python/tvm/_ffi/_ctypes/packed_func.py_237_conv1d_transpose dilation is not supported

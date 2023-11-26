@@ -1,7 +1,7 @@
 import heapq
 import random
 import time
-
+import os
 from TCP.case import TC, TCDict
 
 
@@ -153,6 +153,8 @@ if __name__ == '__main__':
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
+    if os.path.exists(save_test_file):
+        os.remove(save_test_file)
 
     start = time.time()
     mitigated_tc_dict = load_tc_from_file(origin_test_file)

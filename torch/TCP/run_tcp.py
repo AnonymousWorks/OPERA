@@ -1,12 +1,12 @@
 import heapq
 import random
 import time
-
+import os
 from TCP.case import TC, TCDict
 from TCP.load_torch import preprocess_torch_test
 
 
-def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ranked_test_case.py'):
+def run_tcp(SUT, tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ranked_test_case.py'):
     tc_dict.rank_layer(SUT_equipped_tc_dict=SUT_equipped_tc_dict)
     SUT_dict = TCDict()
     all_dict = TCDict()
@@ -46,7 +46,7 @@ def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ran
                     r *= 1.0 / len(all_tc_dict_pair[key])
             print('rate ', layer, SUT_tc_dict, all_tc_dict)
         else:
-            r = 0  # Todo[@sqc]: change it latter
+            r = 0
         r = 1.0 - r
         rate[layer] = r
         print(f'{layer} : {r}')
@@ -58,14 +58,14 @@ def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ran
         if len(instance_list) == 0:  # skip it if the layer group is empty
             continue
         length += len(tc_dict.all_tc[layer_name])
-        this_selected_tc, max_distance = tc_dict.select_instance(layer_name)
+        this_selected_tc, max_distance = tc_dict.select_instance(layer_name, SUT)
         if max_distance == 0:
             continue
         heapq.heappush(heap, (-rate[layer_name] * max_distance, this_selected_tc))
-    will_delete_layer_group = []
+    # will_delete_layer_group = []
     while len(heap) != 0:
         max_distance, this_selected_tc = heapq.heappop(heap)
-        print(f'{time.time()} {len(heap)} {max_distance}')
+        # print(f'{time.time()} {len(heap)} {max_distance}')
         with open(save_file, 'a', encoding='utf-8') as out_f:
             line_cnt = this_selected_tc.id
             out_f.write(this_selected_tc.test_cmd_str.strip()[:-2] + f",count={line_cnt},)\n")
@@ -78,7 +78,7 @@ def run_tcp(tc_dict, SUT_equipped_tc_dict, max_instance_number=1, save_file='ran
             # del tc_dict.all_tc[layer_name]
             continue
         else:
-            selected_tc, distance = tc_dict.select_instance(layer_name)
+            selected_tc, distance = tc_dict.select_instance(layer_name, SUT)
             heapq.heappush(heap, (-rate[layer_name] * distance, selected_tc))
 
     for layer_name, instance_list in tc_dict.all_tc.items():
@@ -108,17 +108,19 @@ def load_tc_from_file(tc_file_name):
 
 if __name__ == '__main__':
     front = 'torch'
-    SUT = "trt"  # ov, tvm, trt
+    SUT = "ov"  # ov, tvm, trt
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
     # origin_test_file = f"../data/demo.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
+    if os.path.exists(save_test_file):
+        os.remove(save_test_file)
 
     start = time.time()
     mitigated_tc_dict = preprocess_torch_test(origin_test_file)
     SUT_tc_dict = preprocess_torch_test(SUT_equipped_test_file).all_tc
     mid = time.time()
 
-    run_tcp(mitigated_tc_dict, SUT_tc_dict, max_instance_number=100, save_file=save_test_file)
+    run_tcp(SUT, mitigated_tc_dict, SUT_tc_dict, max_instance_number=100, save_file=save_test_file)
     print(f'load time: {(mid - start)} s')
     print(f'all time: {(time.time() - start)} s')
