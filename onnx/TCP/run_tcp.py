@@ -112,23 +112,8 @@ def preprocess_onnx_tc_from_file(tc_file_name):
                     # count += 1
                     all_test_cases[i] = this_test_case
                     this_test_case = ''
-            # if "UNDEFINED" in line:
-            #     continue
-            # else:
-            #     op_type = line.split("op_type='")[1].split("', ")[0]
-            #     if op_type in skip_list:
-            #         continue
-            #     else:
-            #         this_test_case += line
-            #         if line.endswith(")\n"):
-            #             # count += 1
-            #             all_test_cases[i] = this_test_case
-            #             this_test_case = ''
         else:
             if this_test_case:
-                # if "UNDEFINED" in line:
-                #     this_test_case = ''
-                #     continue
                 this_test_case += line
                 if line.endswith(")\n"):
                     count += 1
