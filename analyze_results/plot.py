@@ -399,7 +399,7 @@ def run_onnx(SUT):
 
 
 if __name__ == "__main__":
-    SUT = "tvm"  # tvm, ov, trt
+    SUT = "trt"  # tvm, ov, trt
     # run_torch(SUT)
-    run_keras(SUT)
-    # run_onnx(SUT)
+    # run_keras(SUT)
+    run_onnx(SUT)
