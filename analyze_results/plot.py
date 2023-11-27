@@ -173,7 +173,7 @@ def run_parse(bugs_file, front):
         elif "t argument must be a string, a bytes-like object or a number," in bug_info:
             continue  # this is a FP: 'return_runtime' attribute is not valid.
         elif "UpSampling2D" == op and "Input element type must be f32, f16, bf16, i8, u8, i64, i32" in bug_info:
-            bug_key = "Input element type must be f32, f16, bf16, i8, u8, i64, i32"
+            bug_key = "UpSampling2D, Input element type must be f32, f16, bf16, i8, u8, i64, i32"
         elif (
             "exceeds maximum of" in bug_info
             or "quant param not found" in bug_info
@@ -181,7 +181,7 @@ def run_parse(bugs_file, front):
         ):
             continue  # false positive
         # Todo: it is a concurrency bug, considered as one
-        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU', 'LeakyReLU', 'ZeroPadding2D'] and 'wrong results' in bug_key:
+        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU', 'LeakyReLU', 'ZeroPadding2D', 'Concatenate'] and 'wrong results' in bug_key:
             bug_key = "wrong result, concurrency flaky bugs"
         elif SUT == 'tvm' and "Divide by zero" in bug_key and op == 'AdaptiveMaxPool2d':
             bug_key = "Divide by zero"
@@ -400,6 +400,6 @@ def run_onnx(SUT):
 
 if __name__ == "__main__":
     SUT = "ov"  # tvm, ov, trt
-    run_torch(SUT)
+    # run_torch(SUT)
     run_keras(SUT)
-    run_onnx(SUT)
+    # run_onnx(SUT)
