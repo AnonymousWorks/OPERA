@@ -42,7 +42,7 @@ def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ran
                 else:
                     r *= 1.0 / len(all_tc_dict_pair[key])
         else:
-            r = 0.9
+            r = 0
         r = 1.0 - r
         rate[layer] = r
         print(f'{layer} : {r}')
@@ -149,7 +149,7 @@ def load_tc_from_file(tc_file_name):
 
 if __name__ == '__main__':
     front = 'onnx'
-    SUT = "trt"  # ov, tvm, trt
+    SUT = "tvm"  # ov, tvm, trt
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
