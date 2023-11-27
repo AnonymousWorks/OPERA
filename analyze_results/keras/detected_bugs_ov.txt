@@ -57,6 +57,7 @@
 6497	wrong results	RandomRotation	wrong result
 7145	wrong results	ZeroPadding2D	wrong result
 10442	wrong results	RandomZoom	wrong result
+7240	crash	Attention	OpConversionFailure_/openvino/frontend/frontend.py_18_Attribute with name 'exclusive' does not exist
 4524	wrong results	Concatenate	wrong result
 7810	wrong results	RandomFlip	wrong result
 1922	wrong results	Cropping3D	wrong result
@@ -123,6 +124,7 @@
 11128	wrong results	ZeroPadding2D	wrong result
 12441	wrong results	RandomZoom	wrong result
 18990	wrong results	RandomRotation	wrong result
+19785	crash	Attention	OpConversionFailure_/openvino/frontend/frontend.py_18_Attribute with name 'exclusive' does not exist
 11155	wrong results	RandomFlip	wrong result
 21028	crash	GlobalAveragePooling2D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 21030	wrong results	GlobalAveragePooling2D	wrong result
@@ -736,7 +738,6 @@
 25799	crash	ZeroPadding2D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 28443	crash	UpSampling3D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 21893	crash	AlphaDropout	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
-21250	wrong results	UpSampling1D	wrong result
 27152	crash	Flatten	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 28444	crash	UpSampling3D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 30387	crash	UpSampling3D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
@@ -2652,7 +2653,6 @@
 32358	crash	GlobalAveragePooling2D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 36248	crash	Flatten	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 39458	crash	GlobalMaxPooling1D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
-33654	wrong results	UpSampling1D	wrong result
 32359	crash	GlobalAveragePooling3D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 31775	crash	UpSampling1D	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
 39459	crash	Activation	RuntimeError_/openvino/frontend/frontend.py_18_Check 'm_element_type != element::undefined && m_element_type.is_static' failed at src/inference/src/dev/make_tensor.cpp:34
