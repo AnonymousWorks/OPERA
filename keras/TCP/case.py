@@ -254,9 +254,9 @@ class TCDict:
         if num_para == 0:
             return 0
         if SUT in ['tvm', 'trt']:
-            unsupported_type = ['complex128', 'int8', 'int16', 'int32', 'int64',
+            unsupported_type = ['complex64', 'complex128', 'int8', 'int16', 'int32', 'int64',
                                 'uint8', 'float16']
-        elif SUT in ['ov']:
+        elif SUT == 'ov':
             unsupported_type = ['complex64', 'complex128', 'uint32', 'uint64']
 
         if this_tc_dict['input_dtype'] in unsupported_type:

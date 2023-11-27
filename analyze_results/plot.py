@@ -79,6 +79,8 @@ def run_parse(bugs_file, front):
                 op = op
             elif op.startswith('Reduce'):
                 op = 'Reduce'
+            else:
+                op = preprocess_op_name(op)  # rename the op_layer name
         else:
             op = preprocess_op_name(op)  # rename the op_layer name
 
@@ -178,10 +180,9 @@ def run_parse(bugs_file, front):
             or "make uint from negative value" in bug_info
         ):
             continue  # false positive
-        # todo: it is a concurrency bug, but can not be reporduced, skip them.
-        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU'] and 'wrong results' in bug_key:
-            continue
-
+        # Todo: it is a concurrency bug, considered as one
+        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU', 'LeakyReLU', 'ZeroPadding2D'] and 'wrong results' in bug_key:
+            bug_key = "wrong result, concurrency flaky bugs"
         elif SUT == 'tvm' and "Divide by zero" in bug_key and op == 'AdaptiveMaxPool2d':
             bug_key = "Divide by zero"
         # "Divide by zero", "division or modulo by zero", "division by zero"

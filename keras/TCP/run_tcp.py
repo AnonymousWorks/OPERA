@@ -40,6 +40,8 @@ def run_tcp(SUT, tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file
                     r *= 1.0 * len(tvm_tc_dict_pair[key]) / len(all_tc_dict_pair[key])
                 else:
                     r *= 1.0 / len(all_tc_dict_pair[key])
+        else:
+            r = 0
         r = 1.0 - r
         rate[layer] = r
         print(f'{layer} : {r}')
