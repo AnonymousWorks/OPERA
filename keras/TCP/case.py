@@ -157,7 +157,7 @@ class TCDict:
         self.all_tc = {}  # {op1:[ins1, ins2], }
         self.all_selected_tc = {}  # {op1: {para1: [v1, v2], para2: [v2, v3]...}..}
         self.all_selected_tc_pair = {}  # {op1: {para1_para2: [(v1, v3), (v1, v3)]...}..}
-        random.seed(time.time())
+        random.seed(1)
 
     def add(self, tc):
         if tc.layer not in self.all_selected_tc.keys():
@@ -217,7 +217,7 @@ class TCDict:
             self.all_tc = {key: self.all_tc[key] for key in equipped_div_mitigated_rate.keys()}
         print("len all_tc", str(len(self.all_tc)))
 
-    def select_instance(self, layer_name):
+    def select_instance(self, layer_name, SUT):
         candidate_instance_list = self.all_tc[layer_name]
         history_selected_instance_dict = self.all_selected_tc[layer_name]
         # if len(history_selected_instance_dict) == 0:  # empty
@@ -232,7 +232,7 @@ class TCDict:
             # print('debug:', self.all_selected_tc[layer_name])
             this_distance = self.calc_distance(this_tc_params,
                                                self.all_selected_tc[layer_name],
-                                               self.all_selected_tc_pair[layer_name])
+                                               self.all_selected_tc_pair[layer_name], SUT)
             # print(f">>>>>>[debug] {this_distance}=== {this_tc_params}<---> {self.all_selected_tc[layer_name]}")
             if max_distance < this_distance:
                 max_distance = this_distance
@@ -240,7 +240,7 @@ class TCDict:
         return max_distance_tc, max_distance
 
     @staticmethod
-    def calc_distance(this_tc_dict: dict, selected_tc_dict: dict, selected_tc_pair: dict):
+    def calc_distance(this_tc_dict: dict, selected_tc_dict: dict, selected_tc_pair: dict, SUT):
         # The larger the distance, the greater the difference
         num_diff_param = 0.0
         num_para = len(this_tc_dict)
@@ -253,10 +253,14 @@ class TCDict:
                     num_diff_param += 1 / len(selected_tc_dict[k])
         if num_para == 0:
             return 0
-        supported_dtype = ['float64', 'float32']  # int8 only support for OV
-        supported_dtype_ov = ['float64', 'float32', 'int8', 'int16', 'uint16', 'uint32', 'uint64']
-        # if this_tc_dict['input_dtype'] not in supported_dtype_ov:
-        #     return 0
+        if SUT in ['tvm', 'trt']:
+            unsupported_type = ['complex128', 'int8', 'int16', 'int32', 'int64',
+                                'uint8', 'float16']
+        elif SUT in ['ov']:
+            unsupported_type = ['complex64', 'complex128', 'uint32', 'uint64']
+
+        if this_tc_dict['input_dtype'] in unsupported_type:
+            return 0
         if 'input_shape' in this_tc_dict:
             shape = this_tc_dict['input_shape']
             if isinstance(shape, list):
@@ -293,12 +297,7 @@ class TCDict:
 
 if __name__ == '__main__':
     all_tc = ''''layer_test(keras.layers.Dropout,args=(0.3,),kwargs={},input_shape=[4, 2],input_dtype='float32',)
-layer_test(keras.layers.Dense,args=(2,),kwargs={},input_shape=[4, 2],input_dtype='float32',)
-layer_test(keras.layers.Dense,args=(10,),kwargs={},input_shape=[None, 3],input_dtype='float32',)
-layer_test(keras.layers.LSTM,args=(),kwargs={},input_shape=[None, None, 6],input_dtype='float32',)
-layer_test(keras.layers.Permute,args=(),kwargs={'dims':"",},input_shape=[6],input_dtype='float32',)
-layer_test(keras.layers.RepeatVector,args=(2,),kwargs={},input_shape=[3, 1],input_dtype='float32',)
-layer_test(keras.layers.ReLU,args=(),kwargs={'threshold':8736188279335914365,},input_shape=[20, 20, 5, 1, 6],input_dtype='int8',)
+layer_test(keras.layers.ReLU,args=(),kwargs={'negative_slope':181,},input_shape=[2],input_dtype='int32',)
 '''
     tc_dict = TCDict()
     for i, tc in enumerate(all_tc.split('\n')):

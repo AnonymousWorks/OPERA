@@ -178,6 +178,10 @@ def run_parse(bugs_file, front):
             or "make uint from negative value" in bug_info
         ):
             continue  # false positive
+        # todo: it is a concurrency bug, but can not be reporduced, skip them.
+        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU'] and 'wrong results' in bug_key:
+            continue
+
         elif SUT == 'tvm' and "Divide by zero" in bug_key and op == 'AdaptiveMaxPool2d':
             bug_key = "Divide by zero"
         # "Divide by zero", "division or modulo by zero", "division by zero"
@@ -395,6 +399,6 @@ def run_onnx(SUT):
 
 if __name__ == "__main__":
     SUT = "trt"  # tvm, ov, trt
-    # run_torch(SUT)
+    run_torch(SUT)
     # run_keras(SUT)
     run_onnx(SUT)

@@ -1,11 +1,11 @@
 import random
 import time
-
+import os
 from TCP.case import TC, TCDict
 import heapq
 
 
-def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ranked_test_case.py'):
+def run_tcp(SUT, tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ranked_test_case.py'):
     tc_dict.rank_layer(tvm_equipped_tc_dict=tvm_equipped_tc_dict)
     tvm_dict = TCDict()
     all_dict = TCDict()
@@ -50,7 +50,7 @@ def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ran
     for layer_name, instance_list in tc_dict.all_tc.items():
         if len(instance_list) == 0:  # skip it if the layer group is empty
             continue
-        this_selected_tc, max_distance = tc_dict.select_instance(layer_name)
+        this_selected_tc, max_distance = tc_dict.select_instance(layer_name, SUT)
         if max_distance == 0:
             continue
         heapq.heappush(heap, (-rate[layer_name] * max_distance, this_selected_tc))
@@ -71,7 +71,7 @@ def run_tcp(tc_dict, tvm_equipped_tc_dict, max_instance_number=1, save_file='ran
             # del tc_dict.all_tc[layer_name]
             continue
         else:
-            selected_tc, distance = tc_dict.select_instance(layer_name)
+            selected_tc, distance = tc_dict.select_instance(layer_name, SUT)
             heapq.heappush(heap, (-rate[layer_name] * distance, selected_tc))
 
     tests = []
@@ -107,12 +107,14 @@ if __name__ == '__main__':
     origin_test_file = f"../data/original_migrated_{front}_tc.py"
     SUT_equipped_test_file = f"../data/{SUT}_equipped_{front}_tc.py"
     save_test_file = f"../data/ranked_{front}_tc_4_{SUT}.py"
+    if os.path.exists(save_test_file):
+        os.remove(save_test_file)
 
     start = time.time()
     mitigated_tc_dict = load_tc_from_file(origin_test_file)
     SUT_tc_dict = load_tc_from_file(SUT_equipped_test_file).all_tc
     mid = time.time()
 
-    run_tcp(mitigated_tc_dict, SUT_tc_dict, max_instance_number=100, save_file=save_test_file)
+    run_tcp(SUT, mitigated_tc_dict, SUT_tc_dict, max_instance_number=100, save_file=save_test_file)
     print(f'load time: {(mid - start)} s')
     print(f'all time: {(time.time() - start)} s')

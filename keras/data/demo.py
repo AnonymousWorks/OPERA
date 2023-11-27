@@ -1,5 +1,2 @@
-layer_test(keras.layers.Embedding,kwargs={'input_dim':6,'output_dim':32,},input_shape=[None, 6],)
 layer_test(keras.layers.ReLU,kwargs={},input_shape=[None, 28, 28, 256],)
-layer_test(keras.layers.DepthwiseConv2D,args=(),kwargs={'filters':None,'kernel_size':3,'strides':1,'padding':"same",'data_format':None,'dilation_rate':[1, 1],'activation':None,'use_bias':False,'bias_regularizer':None,'activity_regularizer':None,'bias_constraint':None,},input_shape=[None, None, None, 88],input_dtype='float32',)
-layer_test(keras.layers.GRU,kwargs={'return_sequences':True,'return_state':False,'go_backwards':True,'stateful':False,'unroll':False,'time_major':False,},input_shape=[None, 3, 5],)
-layer_test(keras.layers.BatchNormalization,args=(),kwargs={'momentum':0.99,'epsilon':1.001e-05,'center':True,'scale':True,'beta_regularizer':None,'gamma_regularizer':None,'beta_constraint':None,'gamma_constraint':None,},input_shape=[None, 14, 14, 1120],input_dtype='float32',)
+layer_test(keras.layers.UpSampling1D,args=(),kwargs={},input_shape=[3, 1, 2],input_dtype='bool',)

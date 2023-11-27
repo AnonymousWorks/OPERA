@@ -28,14 +28,6 @@ def get_default_args_dict_torch_func(func_name):
         default_args['input_shape'] = 'no_default'
         default_args = dict(reversed(default_args.items()))
         return default_args
-    # elif func_name == 'torch.nn.functional.linear':
-    #     default_args['input'] = 'no_default'
-    #     default_args['weight'] = 'no_default'
-    #     default_args['bias'] = None
-    #     default_args['input_dtype'] = 'no_default'
-    #     default_args['input_shape'] = 'no_default'
-    #     default_args = dict(reversed(default_args.items()))
-    #     return default_args
     elif func_name == 'torch.nn.functional.conv_transpose2d':
         default_args['input'] = 'no_default'
         default_args['weight'] = 'no_default'
