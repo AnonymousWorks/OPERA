@@ -53,7 +53,7 @@ def preprocess_params(default_dict: dict, collected_dict: dict):
         elif k in result_dict.keys():
             result_dict[k] = v
         else:
-            print(">>> [Warning] the key {k} is invisible in default_dict: {default_dict}")
+            print(f">>> [Warning] the key {k} is invisible in default_dict: {default_dict}")
             continue
             # print(f"")  # redundant para for **kwargs
     if 'no_default' in result_dict.values():  # the collected test case lack para value for the undefault para

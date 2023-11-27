@@ -181,7 +181,7 @@ def run_parse(bugs_file, front):
         ):
             continue  # false positive
         # Todo: it is a concurrency bug, considered as one
-        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU', 'LeakyReLU', 'ZeroPadding2D', 'Concatenate'] and 'wrong results' in bug_key:
+        elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU', 'LeakyReLU', 'ZeroPadding2D',] and 'wrong results' in bug_key:
             bug_key = "wrong result, concurrency flaky bugs"
         elif SUT == 'tvm' and "Divide by zero" in bug_key and op == 'AdaptiveMaxPool2d':
             bug_key = "Divide by zero"
@@ -399,7 +399,7 @@ def run_onnx(SUT):
 
 
 if __name__ == "__main__":
-    SUT = "ov"  # tvm, ov, trt
+    SUT = "tvm"  # tvm, ov, trt
     # run_torch(SUT)
     run_keras(SUT)
     # run_onnx(SUT)
