@@ -19,7 +19,7 @@ Also, it designs a diversity-based test prioritization strategy to migrate and e
 
 
 #### 2. Extract Operator Instances
-> instruments each operator API in the sources code of DL compilers for operator instance extraction.
+> instruments each operator API in the source code of DL compilers for operator instance extraction.
 ###### Steps:
   1) execute all test suites equipped by the three DL libraries and the DocTer fuzzing under the instrumented DL libraries.
   2) save the operator instance and wrap them into DL models automatically in the designed instrumented code,
@@ -42,11 +42,12 @@ Therefore, RAUC-s are proposed to measure the prioritization effectiveness when 
 Specifically, it is calculated based on the prioritization result graph with the number of tests as the x-axis and the bug number as the y-axis.
 The RAUC is determined by calculating the area under the curve of the prioritization technique and contrasting it with the area under the curve of the ideal prioritization, which represents the sequential order in which the test cases would have been executed had all bugs been known beforehand.
 In our study, we evaluated the performance of the TCP technique on different proportions of test cases, specifically 25\%, 50\%, 75\%, and 100\% of the total number of tests, which we referred to as RAUC-25\%, RAUC-50\%, RAUC-75\%, and RAUC-100\% respectively. A higher value of RAUC-k indicates better performance of the prioritization strategy. The bold in the table means the best value.
-![rauc](https://github.com/AnonymousWorks/OPERA/assets/89679728/57c206d4-2c8e-46b6-bbc3-269b18f2a299)
+![rauc](https://github.com/AnonymousWorks/OPERA/assets/89679728/d54d1f61-1b07-4e6e-9dbb-7a0290e8297b)
+
 
 
 ### Bug Details
-> This work has detected 78 previously unknown bugs, 42 of which have been confirmed/fixed by TVM developers.
+> This work has detected 159 previously unknown bugs, 80 of which have been confirmed/fixed by developers.
 The id of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
 
 
