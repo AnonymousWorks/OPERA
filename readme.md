@@ -6,6 +6,15 @@ Also, it designs a diversity-based test prioritization strategy to migrate and e
 
 ### Reproducibility
 
+#### 0. File Structure
+For each model format (i.e., PyTorch, Keras, and ONNX), we set up a directory in the root directory.
+Each project directory includes the following items:
+* **migrate**: It includes the source code for collected test inputs from DL libraries and converts them into DL models for testing DL compilers.
+* **data**: the collected test inputs from DL libraries and equipped test inputs from DL compilers for test prioritization
+* **TCP**: the test prioritization strategy of OPERA for rank all migrated test inputs
+* **fuzz**: script for running the collected test inputs to detect bugs in DL compilers
+
+
 ####  1. Build Environment
 
 > Install the related DL libraries environment for collected source test cases as follows:
@@ -62,6 +71,6 @@ In our study, we evaluated the performance of the TCP technique on different pro
 
 ### Bug Details
 > This work has detected 159 previously unknown bugs, 80 of which have been confirmed/fixed by developers.
-The id of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
+The ID of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
 
 
