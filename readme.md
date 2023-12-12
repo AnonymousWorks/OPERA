@@ -34,10 +34,10 @@ Each project directory includes the following items:
      `pip install tensorrt==8.6`
 
 
-#### 2. Extract Operator Instances
-> instruments each operator API in the source code of DL compilers for operator instance extraction.
+#### 2. Migrate the test inputs
+> instruments of each operator API in the source code of DL compilers for operator instance extraction.
 ###### Steps:
-  1) execute all test suites equipped by the three DL libraries and the DocTer fuzzing under the instrumented DL libraries.
+  1) execute all test suites equipped by the three DL libraries and the DocTer fuzzing under the instrumented DL libraries. Detailed instrumentation steps are shown in the `readme.md` file of each subproject.
   2) save the operator instance and wrap them into DL models automatically in the designed instrumented code,
   3) The extracted test inputs were saved in the path library_name/data (e.g., keras/data)
 
