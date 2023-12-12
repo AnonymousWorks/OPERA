@@ -59,7 +59,7 @@ python run_fuzz.py ../data/original_migrated_onnx_tc.py SUT_name dllibrary_name
 > replace `dllibrary_name` with one of the model frameworks from [torch, keras, onnx]
 ----
 
-### Supplement Results(RAUC-k value)
+### Supplement Results (RAUC-k metric)
 $RAUC-k$ is a metric to measure the prioritization effectiveness when all prioritized tests can not be executed completely in a limited time practically. 
 Therefore, RAUC-s are proposed to measure the prioritization effectiveness when only top k tests can be executed.
 Specifically, it is calculated based on the prioritization result graph with the number of tests as the x-axis and the bug number as the y-axis.
