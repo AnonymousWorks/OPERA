@@ -70,7 +70,7 @@ In our study, we evaluated the performance of the TCP technique on different pro
 
 
 ### Bug Details
-> This work has detected 159 previously unknown bugs, 83 of which have been confirmed/fixed by developers.
+> This work has detected 159 previously unknown bugs, 84 of which have been confirmed/fixed by developers.
 The ID of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
 
 
