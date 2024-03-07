@@ -1,7 +1,6 @@
 import sys
 
 import openvino as ov
-import ipywidgets as widgets
 import torch
 from torch.nn import Module
 
@@ -144,14 +143,7 @@ def compile_torch(cnt, model, input_shapes, input_data):
     core = ov.Core()
     model = core.read_model(ir_path)
 
-    device = widgets.Dropdown(
-        options=core.available_devices + ["AUTO"],
-        value='AUTO',
-        description='Device:',
-        disabled=False,
-    )
-
-    compiled_model = core.compile_model(model=model, device_name=device.value)
+    compiled_model = core.compile_model(model=model, device_name="CPU")
 
     # show the model structure
     # input_key = compiled_model.input(0)
