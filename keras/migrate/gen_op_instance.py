@@ -125,7 +125,7 @@ def gen_fun_call(api, para):
         input_shape, input_dtype = get_tensor_shape(para['batch_input_shape'], input_dim)
     elif 'input_shape' in para.keys():  # priority: L1
         input_shape, input_dtype = get_tensor_shape(para['input_shape'], input_dim)
-        input_shape = input_shape.insert(0, random.randint(1, 4))  # set batch_size = random
+        input_shape.insert(0, random.randint(1, 4))  # set batch_size = random
     elif input_signature:  # priority: L2
         input_shape, input_dtype = get_tensor_shape(input_signature, input_dim)
     else:  # priority: L3
