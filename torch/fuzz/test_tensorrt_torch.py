@@ -105,8 +105,8 @@ def verify_model(
         return  # TODO: modify the test_case extraction method to get correct api_call rather than ignore it.
     # res_dlc = compile_torch(count, trace, input_shapes, baseline_input)
     try:
-        # res_dlc = compile_torch(count, traced_model, input_shapes, baseline_input)
-        res_dlc = baseline_outputs
+        res_dlc = compile_torch(count, traced_model, input_shapes, baseline_input)
+        # res_dlc = baseline_outputs
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e) or 'type must be' in str(e):
             print(e)
