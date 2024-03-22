@@ -31,9 +31,12 @@ def plot_all(all_method_res_dict):
 
 
 def preprocess_op_name(op_name):
+    if op_name.endswith('_'):
+        op_name = op_name[:-1]
     op_name = list(op_name)
     if op_name[0].islower():
         op_name[0] = op_name[0].upper()
+
     for i, ch in enumerate(op_name):
         if ch == "_":
             # print(op_name)
@@ -50,10 +53,13 @@ def preprocess_op_name(op_name):
         .replace("3D", "2D")
         .replace("_", "")
         .replace("Celu", "CELU")
+        .replace('Selu', 'SELU')
         .replace("MseLoss", "MSELoss")
         .replace("LpPool", "LPPool")
         .replace("Elu", "ELU")
+        .replace('Relu', 'ReLU')
         .replace("MultilabelSoftMarginLoss", "MultiLabelSoftMarginLoss")
+        .replace('MarginWithDistanceLoss', 'MarginLoss')
     )
 
     return op_name
@@ -76,16 +82,26 @@ def run_parse(bugs_file, front):
         # according to the converter function in torch2trt converter files
         elif SUT == 'trt':
             if front == 'torch' and op in ['MaxPool3d', 'AvgPool3d', 'AdaptiveMaxPool3d', 'AdaptiveAvgPool3d', 'Conv1d', 'Conv3d']:
-                op = op
+                op = op.replace('3d', '2d')
             elif op.startswith('Reduce'):
                 op = 'Reduce'
             else:
                 op = preprocess_op_name(op)  # rename the op_layer name
         else:
             op = preprocess_op_name(op)  # rename the op_layer name
+        if op == 'MultiLabelSoftMarginLoss' or op == 'MarginWithDistanceLoss':
+            # print(bug_line)
+            op = 'MarginLoss'
+        if op == 'BatchNorm':
+            op = 'BatchNorm2d'
+        if op == 'InstanceNorm':
+            op = 'InstanceNorm2d'
+        if front == 'torch' and op.startswith('Triplet'):
+            op = op.replace('Triplet', '')
 
         if "must be evenly divisible by 'num_splits' attribute value" in bug_line:  # deduplicate
             bug_line = "must be evenly divisible by 'num_splits' attribute value"
+
         bug_key = f"{op},{bug_line}".strip()
         bug_info = bug_line.split("_")[-1].strip()
         # bug_key = re.sub(r'\d+', '__num__', bug_key)
@@ -93,8 +109,14 @@ def run_parse(bugs_file, front):
         # print(bug_info)
         if "wrong results" == bug_type:
             bug_key = f"{op},wrong results".strip()
-            if op in ["Bernoulli"] or "Random" in op or "Mod" == op:  # False positive due to randomness
+            # filter out the randomness
+            if op in ["Bernoulli"] or "Random" in op or "Mod" == op or 'Shuffle' in op:
                 continue
+            if SUT == 'tvm' and op in ['ELU', 'Conv2d', 'Dropout2d']:  # float-point exception about 1e-5 and only save the 1e-3
+                continue
+            if SUT == 'tvm' and op in ['SpatialDropout2D', 'Dropout', 'Flatten','Reshape']:
+                bug_key = 'wrong results_diverse ops: bfloat16'
+
             # in subprocess bug, skip it due to cannot reproduce
             # elif op in []:
             #     continue
@@ -102,11 +124,13 @@ def run_parse(bugs_file, front):
             continue
 
         # trt-onnx
-        elif 'out of memory' in bug_key:
-            continue
+        # elif 'out of memory' in bug_key:
+        #     continue
         elif 'invalid argument' in bug_key:
             continue
-        # todo: deduplicate bugs in trt-onnx
+        # for train task or undefined Behavior for div by zero
+        elif op in ['RoiAlign', 'Trilu', 'LayerNormalization'] and SUT+front == 'trtonnx':
+            continue
         # end trt-onnx
 
         elif "got multiple values for argument 'axis'" in bug_key and "Reduce" in op:
@@ -115,14 +139,30 @@ def run_parse(bugs_file, front):
         elif "Demanded batch  doesn't exist" in bug_key:  # the double spaces!!
             continue
         elif "Constant" == op:  # and "Port for tensor name" in bug_key:  # no inputs
-            continue
+            if SUT == 'tvm':
+                pass
+            else:
+                continue
         elif "Port for tensor name axes was not found" in bug_key:
             bug_key = "Port for tensor name axes was not found"
         # end for onnx
 
         # fp in pytorch
+        if 'site-packages/torch' in bug_key:
+            continue
         if "avoid ambiguity in the code" in bug_key:
             continue
+        if 'Arguments do not have the same element type' in bug_line:
+            bug_key = 'Arguments do not have the same element type'
+        if "could not broadcast input array from shape  into shape" in bug_line:
+            bug_key = 'could not broadcast input array from shape  into shape'
+        if 'Element type of data input must be numeric. Got: boolean' in bug_key:
+            continue
+        if op == 'PixelShuffle' and 'values to unpack' in bug_key:
+            bug_key = op + 'ValueError_python/tvm/relay/frontend/pytorch.py_1619_XX values to unpack'
+        if 'object is not initialized' in bug_key:
+            bug_key = 'object is not initialized'
+
         # end for pytorch
         # trt-torch
         if "'TRTModule' object has no attribute 'context'" in bug_key:
@@ -180,22 +220,24 @@ def run_parse(bugs_file, front):
             or "make uint from negative value" in bug_info
         ):
             continue  # false positive
-        # Todo: it is a concurrency bug, considered as one
+        # it is a concurrency bug, considered as one
         elif SUT == 'ov' and front == 'keras' and op in ['Cropping2D', 'ReLU', 'LeakyReLU', 'ZeroPadding2D',] and 'wrong results' in bug_key:
             bug_key = "wrong result, concurrency flaky bugs"
         elif SUT == 'tvm' and "Divide by zero" in bug_key and op == 'AdaptiveMaxPool2d':
             bug_key = "Divide by zero"
         # "Divide by zero", "division or modulo by zero", "division by zero"
-        elif "by zero" in bug_info and op in ["InstanceNorm", "InstanceNorm2d", "AdaptiveMaxPool2d", "AdaptiveMaxPool3d", "Normalize", "Interpolate"]:
+        elif "by zero" in bug_info and op in ['Flatten', "Softmin", "Softmax", "LogSoftmax", "L1Loss", "MSELoss", "AdaptiveAvgPool2d", "InstanceNorm", "InstanceNorm2d", "AdaptiveMaxPool2d", "AdaptiveMaxPool3d", "Normalize", "Interpolate"]:
             continue  # a workaround to fileout the input_shape includes 0
-        elif "is expected to be int64" in bug_info:
-            continue
+        elif "idx < ishape.size" in bug_info:
+            continue  # input shape contain 0
+        # elif "is expected to be int64" in bug_info:
         # ---------------------
         elif (
             "not support" in bug_info
             or "only supported" in bug_info
             or "Support only" in bug_info
             or "not handled yet" in bug_info
+            or 'only accepts' in bug_info
         ):
             continue
         elif "<class 'NoneType'>" in bug_info:
@@ -261,6 +303,8 @@ def get_ranked_tc_tcp_res(bug_line_dict, ranked_bugs_file):
     for line in all_lines:
         if line.startswith("layer_test") or line.startswith("verify_model") or line.startswith("make_graph"):
             test_id = line.strip().split("count=")[-1][:-2]
+            if 'line' in ranked_bugs_file:  # todo:dangerous
+                test_id = str(int(test_id)+1)
             # print(test_id)
             if test_id in bug_line_dict.keys():
                 bug_info = bug_line_dict[test_id]
@@ -278,14 +322,48 @@ def get_ranked_tc_tcp_res(bug_line_dict, ranked_bugs_file):
     return ranked_unique_bugs_line_list, ranked_unique_bugs_key_set
 
 
+def _count_each_source(all_bug_line_dict:dict, front):
+    bugs_set_from_DLL_equipped = set()
+    bug_set_from_docter = set()
+    bug_set_from_deeprel = set()
+    threshold = 1014
+    if front == "torch":
+        threshold = 32378
+    elif front == 'keras':
+        threshold = 20993
+    for k, v in all_bug_line_dict.items():
+        cnt = int(k)
+        if cnt <= threshold:
+            bugs_set_from_DLL_equipped.add(v)
+        elif cnt <= 2*threshold:
+            bug_set_from_docter.add(v)
+        else:
+            bug_set_from_deeprel.add(v)
+    both_number = len(bug_set_from_docter.intersection(bugs_set_from_DLL_equipped).intersection(bug_set_from_deeprel))
+    double_bug = "Dense,OpAttributeInvalid_python/tvm/relay/frontend/keras.py_265_Input shape  is not valid for operator Dense."
+    if double_bug in bugs_set_from_DLL_equipped and double_bug in bug_set_from_docter and double_bug in bug_set_from_deeprel:
+        both_number += 1
+    # print("#unique bugs from DLL equipped:", len(bugs_set_from_DLL_equipped -bug_set_from_docter-bug_set_from_deeprel))
+    # for i in bugs_set_from_DLL_equipped:
+    #     print(SUT,i)
+    # print("#unique bugs from docter source", len(bug_set_from_docter - bugs_set_from_DLL_equipped-bug_set_from_deeprel))
+    # for i in bug_set_from_docter:
+    #     print(SUT,i)
+    # print("#unique bugs from deeprel source", len(bug_set_from_deeprel - bugs_set_from_DLL_equipped-bug_set_from_docter))
+    # for i in bug_set_from_deeprel:
+    #     print(SUT,i)
+    # print("#both bugs from two sources", both_number)
+    return len(bugs_set_from_DLL_equipped), len(bug_set_from_docter), len(bug_set_from_deeprel)
+
+
 def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
-               baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num):
+                baseline_fast_tcp_file, test_case_num):
 
     all_methods_accumulate_bugs_dict = {}
     print("all bugs:...\n")
     all_bugs_line_list, all_bugs_list, all_bug_line_dict = run_parse(all_bugs_file, front)
-    # print(all_bugs_line_list)
 
+    _count_each_source(all_bug_line_dict, front)
     print("test cases number which can detect a bug: ", len(all_bug_line_dict))
     print("---------------------------------each tcp method--------------------------------------------")
     print("\n\nranked tc bugs:...\n")
@@ -348,37 +426,41 @@ def common_run(front, all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, b
 
 
 def run_keras(SUT):
-    test_case_num = 41986
+    test_case_num = 62976
 
-    all_bugs_file = f"keras/detected_bugs_{SUT}.txt"
+    all_bugs_file = f"../keras/data/detected_bugs_{SUT}.txt"
     ranked_bugs_file = f"../keras/data/ranked_keras_tc_4_{SUT}.py"
 
     # baseline tcp results
-    baseline_line_tcp_file = f"keras/line.py"
-    baseline_delta_line_tcp_file = f"keras/delta_line.py"
-    baseline_branch_tcp_file = f"keras/branch.py"
-    baseline_delta_branch_tcp_file = f"keras/delta_branch.py"
-    baseline_fast_tcp_file = f"keras/fast.py"
+    baseline_line_tcp_file = f"../coverage/ranked_results/keras_{SUT}_line.py"
+    baseline_delta_line_tcp_file = f"../coverage/ranked_results/keras_{SUT}_delta_line.py"
+    # baseline_line_tcp_file = f"keras/line.py"
+    # baseline_delta_line_tcp_file = 'keras/delta_line.py'
+    # baseline_branch_tcp_file = f"keras/branch.py"
+    # baseline_delta_branch_tcp_file = f"keras/delta_branch.py"
+    baseline_fast_tcp_file = f"../fast/fast_keras.py"
 
     common_run("keras", all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
-               baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
+               baseline_fast_tcp_file, test_case_num)
 
 
 def run_torch(SUT):
-    test_case_num = 64756
+    test_case_num = 97134
 
-    all_bugs_file = f"torch/detected_bugs_{SUT}.txt"
+    all_bugs_file = f"../torch/data/detected_bugs_{SUT}.txt"
     ranked_bugs_file = f"../torch/data/ranked_torch_tc_4_{SUT}.py"
 
     # baseline tcp results
-    baseline_line_tcp_file = f"torch/line.py"
-    baseline_delta_line_tcp_file = f"torch/delta_line.py"
-    baseline_branch_tcp_file = f"torch/branch.py"
-    baseline_delta_branch_tcp_file = f"torch/delta_branch.py"
-    baseline_fast_tcp_file = f"torch/torch_fast_final.py"
+    baseline_line_tcp_file = f"../coverage/ranked_results/torch_{SUT}_line.py"
+    baseline_delta_line_tcp_file = f"../coverage/ranked_results/torch_{SUT}_delta_line.py"
+    # baseline_delta_line_tcp_file = 'torch/line.py'
+    # baseline_line_tcp_file = 'torch/line.py'
+    # baseline_branch_tcp_file = f"torch/branch.py"
+    # baseline_delta_branch_tcp_file = f"torch/delta_branch.py"
+    baseline_fast_tcp_file = f"../fast/fast_torch.py"
 
     common_run("torch", all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
-               baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
+               baseline_fast_tcp_file, test_case_num)
 
 
 def run_onnx(SUT):
@@ -388,18 +470,18 @@ def run_onnx(SUT):
     ranked_bugs_file = f"../onnx/data/ranked_onnx_tc_4_{SUT}.py"
 
     # baseline tcp results
-    baseline_line_tcp_file = f"onnx/line.py"
-    baseline_delta_line_tcp_file = f"onnx/delta_line.py"
-    baseline_branch_tcp_file = f"onnx/branch.py"
-    baseline_delta_branch_tcp_file = f"onnx/delta_branch.py"
-    baseline_fast_tcp_file = f"onnx/fast_onnx.py"
+    baseline_line_tcp_file = f"../coverage/ranked_results/onnx_{SUT}_line.py"
+    baseline_delta_line_tcp_file = f"../coverage/ranked_results/onnx_{SUT}_delta_line.py"
+    # baseline_branch_tcp_file = f"onnx/branch.py"
+    # baseline_delta_branch_tcp_file = f"onnx/delta_branch.py"
+    baseline_fast_tcp_file = f"../fast/fast_onnx.py"
 
     common_run("onnx", all_bugs_file, ranked_bugs_file, baseline_line_tcp_file, baseline_delta_line_tcp_file,
-               baseline_branch_tcp_file, baseline_delta_branch_tcp_file, baseline_fast_tcp_file, test_case_num)
+               baseline_fast_tcp_file, test_case_num)
 
 
 if __name__ == "__main__":
-    SUT = "trt"  # tvm, ov, trt
-    # run_torch(SUT)
+    SUT = "ov"  # tvm, ov, trt
+    run_torch(SUT)
     # run_keras(SUT)
-    run_onnx(SUT)
+    # run_onnx(SUT)
