@@ -150,6 +150,13 @@ if __name__ == '__main__':
     collected_test_cases_file = sys.argv[1]
     SUT = sys.argv[2]    # [tvm, openvino]
     frame = sys.argv[3]  # [keras, torch, onnx]
-    run_all_test(collected_test_cases_file, SUT, frame)
+    # run_all_test(collected_test_cases_file, SUT, frame)
+    test_begin_id = 1
+    if 'deeprel' in collected_test_cases_file:
+        if frame == 'torch':
+            test_begin_id = 64757
+        elif frame == 'keras':
+            test_begin_id = 41985
+    run_all_test(collected_test_cases_file, SUT, frame, test_begin_id)
     endtime = datetime.datetime.now()
     print("Finish all, time consuming(min): ", (endtime - starttime).seconds/60)

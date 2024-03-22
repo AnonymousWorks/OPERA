@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     starttime = datetime.datetime.now()
     collected_test_cases_file = sys.argv[1]
-    SUT = sys.argv[2]    # [tvm, openvino]
+    SUT = sys.argv[2]    # [tvm, openvino, tensorrt]
     frame = sys.argv[3]  # [keras, torch, onnx]
     run_all_test(collected_test_cases_file, SUT, frame)
     endtime = datetime.datetime.now()

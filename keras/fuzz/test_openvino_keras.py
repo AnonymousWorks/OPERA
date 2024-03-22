@@ -187,14 +187,6 @@ def compile_keras(cnt, model, input_shape, input_data, temp_model_dir):
     core = ov.Core()
     model = core.read_model(ir_path)
 
-    import ipywidgets as widgets
-    device = widgets.Dropdown(
-        options=core.available_devices + ["AUTO"],
-        value='AUTO',
-        description='Device:',
-        disabled=False,
-    )
-
     compiled_model = core.compile_model(model=model, device_name='CPU')  # CPU,GPU,AUTO
     # compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
 

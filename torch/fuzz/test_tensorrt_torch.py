@@ -9,6 +9,7 @@ import re
 import numpy as np
 import os
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3,4,5,6,7"
 
 sys.setrecursionlimit(10000)
 if torch.cuda.is_available():
@@ -64,49 +65,23 @@ def verify_model(
         if isinstance(input_data, list):
             baseline_model = model_name
             baseline_input = input_data
-        elif isinstance(input_data, torch.Tensor) or not input_data.shape:
+        elif isinstance(input_data, torch.Tensor):
             baseline_model = model_name
-            # print(baseline_model)
             baseline_input = [input_data]
         else:
             assert False, "Unexpected input format"
-        if torch.cuda.is_available():
-            if isinstance(baseline_model, torch.nn.Module):
-                baseline_model = baseline_model.cuda()
-            baseline_input = [inp.cuda() for inp in baseline_input]
 
         with torch.no_grad():
             baseline_outputs = baseline_model(*[input.clone() for input in baseline_input])
-
-        if isinstance(baseline_outputs, tuple):
-            for out in baseline_outputs:
-                print(type(out))
-            baseline_outputs = tuple(out.cpu().numpy() for out in baseline_outputs)
-        else:
-            baseline_outputs = (baseline_outputs.cpu().numpy(),)
-
-        trace = torch.jit.trace(baseline_model, [input.clone() for input in baseline_input])
-        if isinstance(baseline_model, torch.nn.Module):
-            trace = trace.float().eval()
-
-            if torch.cuda.is_available():
-                trace = trace.cuda()
-            else:
-                trace = trace.cpu()
-
-        # input_names = [f"input{idx}" for idx, _ in enumerate(baseline_input)]
-        # input_shapes = list(zip(input_names, [inp.shape for inp in baseline_input]))
-        input_shapes = list([inp.shape for inp in baseline_input])
-        trace = torch.jit.freeze(trace)
-        traced_model = torch.jit.script(baseline_model)
-        # print(input_shapes)
+            baseline_outputs = baseline_outputs.cpu().numpy()
+        # input_shapes = list([inp.shape for inp in baseline_input])
     except Exception as e:
         print(f"[test-{count}] torch error: ", e)
         return  # TODO: modify the test_case extraction method to get correct api_call rather than ignore it.
     # res_dlc = compile_torch(count, trace, input_shapes, baseline_input)
     try:
-        res_dlc = compile_torch(count, traced_model, input_shapes, baseline_input)
-        # res_dlc = baseline_outputs
+        model_trt = torch2trt(model_name.cuda(), baseline_input)
+        res_dlc = model_trt(*baseline_input).cpu().numpy()
     except Exception as e:
         if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e) or 'type must be' in str(e):
             print(e)
@@ -119,24 +94,19 @@ def verify_model(
         return
     try:
         # print(len(baseline_outputs))
-        for i, baseline_output in enumerate(baseline_outputs):
-            output = res_dlc[i]
-            # print(output.shape)
-            assert_shapes_match(baseline_output, output)
-            if check_correctness:
-                np.testing.assert_allclose(baseline_output, output, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(baseline_outputs, res_dlc, rtol=rtol, atol=atol)
+        # for i, baseline_output in enumerate(baseline_outputs):
+        #    output = res_dlc[i]
+        #    # print(output.shape)
+        #    assert_shapes_match(baseline_output, output)
+        #    if check_correctness:
+        #        np.testing.assert_allclose(baseline_output, output, rtol=rtol, atol=atol)
     except AssertionError as e:
         print(e)
         record_bug(count, 'wrong results', type(model_name).__name__, 'wrong result')
         return
     print("[success] This test case passed!")
 
-
-def compile_torch(cnt, model, input_shapes, input_data):
-    model_trt = torch2trt(model, input_data)
-    print("[debug]")
-    result = model_trt(input_data)
-    return result
 
 if __name__ == '__main__':
     # class pad(Module):
@@ -151,18 +121,12 @@ if __name__ == '__main__':
     #              input_data=input_data)
 
     # test_id: 4134
-    para_0 = torch.randn([1, 16, 4, 4], dtype=torch.float32)
-    
-    class avg_pool2d(Module):
-        def forward(self, input):
-            return torch.nn.functional.avg_pool2d(input, ceil_mode=True,  kernel_size=(1, 2), padding=(0, 1), stride=2)
-    verify_model(avg_pool2d().float().eval(), input_data=para_0)
-
-    # para_0 = torch.randn([1, 3, 7, 7], dtype=torch.float32)
-    # class lp_pool2d(Module):
-    #     def forward(self, *args):
-    #         return torch.nn.functional.lp_pool2d(args[0], norm_type=1.5, kernel_size=2)
-    # verify_model(lp_pool2d().float().eval(), input_data=para_0)
+    # para_0 = torch.randn([1, 16, 4, 4], dtype=torch.float32)
+    #
+    # class avg_pool2d(Module):
+    #     def forward(self, input):
+    #         return torch.nn.functional.avg_pool2d(input, ceil_mode=True,  kernel_size=(1, 2), padding=(0, 1), stride=2)
+    # verify_model(avg_pool2d().float().eval(), input_data=para_0)
 
     # test_id: 13877
     # para_0 = torch.randn([1, 9216], dtype=torch.float32)
@@ -170,3 +134,14 @@ if __name__ == '__main__':
     #     def forward(self, *args):
     #         return torch.nn.functional.dropout(args[0])
     # verify_model(dropout().float().eval(), input_data=para_0)
+
+    para_0 = torch.randn([6, 176, 9, 9], dtype=torch.float32).cuda()
+
+
+    class max_pool2d(Module):
+        def forward(self, *args):
+            return torch.nn.functional.max_pool2d(args[0], kernel_size=3, stride=1, padding=0, dilation=2,
+                                                  ceil_mode=True, )
+
+
+    verify_model(max_pool2d().float().eval(), input_data=para_0)

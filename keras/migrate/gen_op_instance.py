@@ -67,7 +67,7 @@ def gen_fun_call(api, para):
         return None
     if 'src.' in api:  # high tf version  e.g., keras.src.layers.activation.relu.ReLU
         api_name = f"keras.{temp_api[2]}.{temp_api[-1]}"
-    elif api.startswith("keras.layers."):
+    elif api.startswith('keras.layers.'):
         api_name = f"keras.{temp_api[1]}.{temp_api[-1]}"
     else:  # low tf version e.g., tensorflow.python.keras.layers.advanced_activations.Softmax
         api_name = f"keras.{temp_api[3]}.{temp_api[-1]}"

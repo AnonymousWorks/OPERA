@@ -70,10 +70,10 @@ def verify_model(
             baseline_input = [input_data]
         else:
             assert False, "Unexpected input format"
-        if torch.cuda.is_available():
-            if isinstance(baseline_model, torch.nn.Module):
-                baseline_model = baseline_model.cuda()
-            baseline_input = [inp.cuda() for inp in baseline_input]
+        # if torch.cuda.is_available():
+        #     if isinstance(baseline_model, torch.nn.Module):
+        #         baseline_model = baseline_model.cuda()
+        #     baseline_input = [inp.cuda() for inp in baseline_input]
 
         with torch.no_grad():
             baseline_outputs = baseline_model(*[input.clone() for input in baseline_input])
@@ -143,7 +143,7 @@ def compile_torch(cnt, model, input_shapes, input_data):
     core = ov.Core()
     model = core.read_model(ir_path)
 
-    compiled_model = core.compile_model(model=model, device_name="CPU")
+    compiled_model = core.compile_model(model=model, device_name="CPU")  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
@@ -185,18 +185,27 @@ if __name__ == '__main__':
     #         return torch.nn.functional.conv_transpose2d(args[0], para_1, para_2,)
     # verify_model(conv_transpose2d().float().eval(), input_data=para_0)
 
-    para_0 = torch.randint(1, 100, [1, 2, 4, 5], dtype=torch.int64)
-    para_1 = torch.randint(1, 100, [2, 2, 2, 3], dtype=torch.int64)
-    para_2 = torch.randint(1, 100, [4], dtype=torch.int64)
-    para_3 = (1, 1)
-    para_4 = (0, 0)
-    para_5 = (0, 0)
-    para_6 = 2
-    para_7 = (1, 1)
+    # para_0 = torch.randint(1, 100, [1, 2, 4, 5], dtype=torch.int64)
+    # para_1 = torch.randint(1, 100, [2, 2, 2, 3], dtype=torch.int64)
+    # para_2 = torch.randint(1, 100, [4], dtype=torch.int64)
+    # para_3 = (1, 1)
+    # para_4 = (0, 0)
+    # para_5 = (0, 0)
+    # para_6 = 2
+    # para_7 = (1, 1)
+    #
+    # class conv_transpose2d(Module):
+    #     def forward(self, *args):
+    #         return torch.nn.functional.conv_transpose2d(args[0], para_1, para_2, para_3, para_4, para_5, para_6,
+    #                                                     para_7, )
+    # verify_model(conv_transpose2d().float().eval(), input_data=para_0)
 
-    class conv_transpose2d(Module):
+    # test_id: 8204
+    para_0 = torch.randn([1, 5, 6, 7], dtype=torch.float64)
+    para_1 = (5, 2, 5)
+
+    class avg_pool3d(Module):
         def forward(self, *args):
-            return torch.nn.functional.conv_transpose2d(args[0], para_1, para_2, para_3, para_4, para_5, para_6,
-                                                        para_7, )
-    verify_model(conv_transpose2d().float().eval(), input_data=para_0)
+            return torch.nn.functional.avg_pool3d(args[0], para_1, )
 
+    verify_model(avg_pool3d().float().eval(), input_data=para_0)

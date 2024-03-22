@@ -69,7 +69,7 @@ from test_{SUT}_onnx import make_graph
     save_dir = f"{save_dir}_{frame}"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    shutil.copy(f"test_{SUT}_{frame}.py", save_dir)
+        shutil.copy(f"test_{SUT}_{frame}.py", save_dir)
     save_test_file_path = os.path.join(save_dir, f'test_{test_id}.py')
     if not os.path.exists(save_test_file_path):
         with open(save_test_file_path, 'w', encoding='utf-8') as test_f:
@@ -92,7 +92,7 @@ def _load_test_from_file(test_file, cnt=1):
             else:
                 line += f",count={cnt},)"
             this_test_case += line
-            if this_test_case not in all_test_str_list:  # deduplicate
+            if this_test_case not in all_test_str_list:
                 all_test_str_list.append(this_test_case)
                 cnt += 1
             this_test_case = ''
@@ -121,12 +121,12 @@ def run_all_test(test_file, SUT, frame, begin_id=1):
                 all_test_files.append(tc_file)
 
     # Execute the tests
-    for tc in all_test_files:
-        run_subprocess(tc)
-    # pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()//2)
-    # pool.map(run_subprocess, all_test_files)
-    # pool.close()
-    # pool.join()
+    # for tc in all_test_files:
+    #     run_subprocess(tc)
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()//2)
+    pool.map(run_subprocess, all_test_files)
+    pool.close()
+    pool.join()
 
 
 if __name__ == '__main__':
@@ -139,6 +139,12 @@ if __name__ == '__main__':
     collected_test_cases_file = sys.argv[1]
     SUT = sys.argv[2]    # [tvm, openvino]
     frame = sys.argv[3]  # [keras, torch, onnx]
-    run_all_test(collected_test_cases_file, SUT, frame)
+    test_begin_id = 1
+    if 'deeprel' in collected_test_cases_file:
+        if frame == 'torch':
+            test_begin_id = 64757
+        elif frame == 'keras':
+            test_begin_id = 41985
+    run_all_test(collected_test_cases_file, SUT, frame, test_begin_id)
     endtime = datetime.datetime.now()
     print("Finish all, time consuming(min): ", (endtime - starttime).seconds/60)

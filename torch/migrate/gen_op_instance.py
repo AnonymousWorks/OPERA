@@ -164,3 +164,4 @@ def record_op(func_name, params, input_signature, output_signature, output_file)
             f.write(f"# test_id: {count} \n{api_call}\n")
             # all_api_call.append(api_call)
             GlobalVar.add_call(api_call)
+

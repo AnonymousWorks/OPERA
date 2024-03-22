@@ -2,7 +2,6 @@ import onnx
 from onnx import helper
 import numpy as np
 import onnxruntime
-import ipywidgets as widgets
 import openvino as ov
 import os
 import traceback
@@ -311,14 +310,7 @@ def compile_onnx(cnt, model, input_shapes, input_data):
     core = ov.Core()
     model = core.read_model(ir_path)
 
-    device = widgets.Dropdown(
-        options=core.available_devices + ["AUTO"],
-        value='AUTO',
-        description='Device:',
-        disabled=False,
-    )
-
-    compiled_model = core.compile_model(model=model, device_name=device.value)  # CPU,GPU,AUTO
+    compiled_model = core.compile_model(model=model, device_name='CPU')  # CPU,GPU,AUTO
 
     # show the model structure
     # input_key = compiled_model.input(0)
@@ -369,8 +361,10 @@ if __name__ == '__main__':
     # make_graph(op_type='Pad', kwargs={'mode': b'constant'}, input_name=('x', 'pads'),
     #            input_shape=([1, 3, 4, 5], [8]), input_dtype=('FLOAT', 'INT64'), output_name=('y',),
     #            output_shape=([1, 3, 7, 12],), output_dtype=('FLOAT',))
-    make_graph(op_type='Range', kwargs={}, input_name=('start', 'limit', 'delta'), input_shape=([1], [1], [1]),
-               input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('output',), output_shape=([2],),
-               output_dtype=('FLOAT',))
+    # make_graph(op_type='Range', kwargs={}, input_name=('start', 'limit', 'delta'), input_shape=([1], [1], [1]),
+    #            input_dtype=('FLOAT', 'FLOAT', 'FLOAT'), output_name=('output',), output_shape=([2],),
+    #            output_dtype=('FLOAT',))
+    make_graph(op_type='Dropout', kwargs={'seed': 0}, input_name=('x',), input_shape=([3, 4, 5],),
+               input_dtype=('FLOAT',), output_name=('y',), output_shape=([3, 4, 5],), output_dtype=('FLOAT',))
 
 

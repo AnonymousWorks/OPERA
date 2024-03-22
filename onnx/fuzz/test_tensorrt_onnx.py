@@ -2,22 +2,19 @@ import onnx
 from onnx import helper
 import numpy as np
 import onnxruntime
-
 import tensorrt as trt
 import pycuda.driver as cuda
 import pycuda.autoinit
-
 import os
 import traceback
 import re
 import random
 import string
-
-
 import logging
-logging.basicConfig(level=logging.ERROR)
 
+logging.basicConfig(level=logging.ERROR)
 np.random.seed(2023)
+
 
 def convert_kwargs(kwargs):
     new_kwargs = {}
@@ -31,6 +28,7 @@ def convert_kwargs(kwargs):
         else:
             new_kwargs[key] = value
     return new_kwargs
+
 
 def extract_crash_message(e):
     tb = traceback.extract_tb(e.__traceback__)
@@ -55,7 +53,7 @@ def extract_crash_message(e):
 def record_bug(bug_id, bug_type, op, crash_message=''):
     bug_info_str = f"{bug_id}\t{bug_type}\t{op}\t{crash_message}\n"
 
-    with open("detected_bugs_new.txt", 'a', encoding='utf-8') as f:
+    with open("../data/detected_bugs_trt.txt", 'a', encoding='utf-8') as f:
         f.write(bug_info_str)
 
 onnx_dtype_mapping = {
@@ -246,7 +244,9 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         if onnxruntime.__version__ < "1.15":
             make_model_kwargs = {'ir_version': 8}
 
+        #onnx_model = helper.make_model(onnx_graph, **make_model_kwargs)
         model_def = helper.make_model(graph_def, opset_imports=[onnx.helper.make_opsetid("", 18)], **make_model_kwargs)
+        #onnx.save(model_def, 'ReduceL2.onnx')
         # Generate input data
         special_list = ['ConstantOfShape']
         input_data = {}
@@ -269,9 +269,9 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
         return
     try:
         input_dtype_dlc = [dlc_dtype_mapping[dtype] for dtype in input_dtype]
-        dlc_output = compile_onnx(count, onnx_model, input_data)
+        dlc_output = compile_onnx(count, onnx_model, input_name, input_shape, input_data)
     except Exception as e:
-        if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e) or "SUPPORT" in str(e) or "Unable to convert ONNX weights" in str(e):
+        if 'support' in str(e) or 'not allowed' in str(e) or "No conversion rule" in str(e):
             print("[Warning] trigger an unsupported behavior")
         else:
             print(f'[Bug in DLC] using test: {op_type}; id= {count}')
@@ -282,126 +282,74 @@ def make_graph(op_type, kwargs, input_name, input_shape, input_dtype, output_nam
     try:
         if len(output_name) > 1:  # multiple output:
             for i in range(len(output_name)):
-                np.testing.assert_allclose(onnx_output[i], dlc_output[output_name[i]], atol=1e-3, rtol=1e-3)
+                np.testing.assert_allclose(onnx_output[i], dlc_output[i], atol=1e-3, rtol=1e-3)
         else:
-            np.testing.assert_allclose(onnx_output[0], dlc_output[output_name[0]], atol=1e-3, rtol=1e-3)
+            np.testing.assert_allclose(onnx_output[0], dlc_output, atol=1e-3, rtol=1e-3)
     except AssertionError as e:
         print(f'[Bug in DLC] using test: {op_type}; id= {count}')
         print(e)
-        crash_message = extract_crash_message(e)
-        record_bug(count, 'wrong results', op_type, crash_message=crash_message)
+        # crash_message = extract_crash_message(e)
+        record_bug(count, 'wrong results', op_type, crash_message="wrong results")
     else:
         print("[success] This test case passed!")
 
 
-class TRT:
-    def __init__(self):
-        self.engine = None
-
-    def build_engine_onnx(self, onnx_path):
-        builder = trt.Builder(trt.Logger(trt.Logger.WARNING))
-        network = builder.create_network(
-            1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
-        )
-        config = builder.create_builder_config()
-        config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, 2 << 30)
-        parser = trt.OnnxParser(network, trt.Logger(trt.Logger.WARNING))
-        # Load the ONNX model and parse it to populate the TensorRT network.
-        with open(onnx_path, 'rb') as f:
-            if not parser.parse(f.read()):
-                error_msg = ""
-                for error in range(parser.num_errors):
-                    error_msg += str(parser.get_error(error))
-                raise RuntimeError(error_msg)
-        engine_bytes = builder.build_serialized_network(network, config)
-        return trt.Runtime(trt.Logger(trt.Logger.WARNING)).deserialize_cuda_engine(
-            engine_bytes
-        )
-
-    def allocate_buffers(self, engine):
-        inputs = []
-        outputs = []
-        bindings = []
-        stream = cuda.Stream()
-        onames = []
-        name2idx = {}
-        for idx, binding in enumerate(engine):
-            name2idx[binding] = idx
-            size = trt.volume(engine.get_binding_shape(binding)) * engine.max_batch_size
-            dtype = trt.nptype(engine.get_binding_dtype(binding))
-            # Allocate host and device buffers
-            host_mem = cuda.pagelocked_empty(size, dtype)
-            device_mem = cuda.mem_alloc(host_mem.nbytes)
-            # Append the device buffer to device bindings.
-            bindings.append(int(device_mem))
-            # Append to the appropriate list.
-            if engine.binding_is_input(binding):
-                inputs.append((host_mem, device_mem))
-            else:
-                outputs.append((host_mem, device_mem))
-                onames.append(binding)
-        return inputs, outputs, bindings, stream, onames, name2idx
-
-    def do_inference_v2(self, context, bindings, inputs, outputs, stream):
-        # Transfer input data to the GPU.
-        [cuda.memcpy_htod_async(inp[1], inp[0], stream) for inp in inputs]
-        # Run inference.
-        context.execute_async_v2(bindings=bindings, stream_handle=stream.handle)
-        # Transfer predictions back from the GPU.
-        [cuda.memcpy_dtoh_async(out[0], out[1], stream) for out in outputs]
-        # Synchronize the stream
-        stream.synchronize()
-        # Return only the host outputs.
-        return [out[0] for out in outputs]
-
-    def make_backend(self, onnx_path):
-        self.engine = self.build_engine_onnx(onnx_path)
-
-        def closure(inputs):
-            trt_inputs, trt_outputs, trt_bindings, stream, onames, name2idx = self.allocate_buffers(
-                self.engine
-            )
-            context = self.engine.create_execution_context()
-
-            for iname in inputs:
-                np.copyto(
-                    trt_inputs[name2idx[iname]][0],
-                    inputs[iname]
-                    .astype(trt.nptype(self.engine.get_binding_dtype(iname)))
-                    .ravel(),
-                )
-
-            trt_concrete_outputs = self.do_inference_v2(
-                context,
-                bindings=trt_bindings,
-                inputs=trt_inputs,
-                outputs=trt_outputs,
-                stream=stream,
-            )
-
-            return {
-                n: v.reshape(self.engine.get_binding_shape(n))
-                for n, v in zip(onames, trt_concrete_outputs)
-            }
-
-        return closure
-
-
-def compile_onnx(cnt, model, input_data):
+def compile_onnx(cnt, model, input_name, input_shape, input_data):
     temp_model_dir = "_temp_model"
     if not os.path.exists(temp_model_dir):
         os.mkdir(temp_model_dir)
     model_path = os.path.join(temp_model_dir, f"{cnt}.onnx")
     onnx.save_model(model, model_path)
 
-    trt_backend = TRT()
-    onnx_path = model_path
-    infer_func = trt_backend.make_backend(onnx_path)
-    output_data = infer_func(input_data)
+    trt_logger = trt.Logger(trt.Logger.WARNING)
+    trt.init_libnvinfer_plugins(trt_logger, '')
+    builder = trt.Builder(trt_logger)
+    #network = builder.create_network()
+    network = builder.create_network(flags=1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
 
-    # print("output_data:\n", output_data)
+    parser = trt.OnnxParser(network, trt_logger)
+    with open(model_path, 'rb') as model_file:
+        if not parser.parse(model_file.read()):
+            for error in range(parser.num_errors):
+                print(parser.get_error(error))
+            return None
+
+    config = builder.create_builder_config()
+    engine = builder.build_engine(network, config)
+    context = engine.create_execution_context()
+
+    inputs, outputs, bindings = [], [], []
+    stream = cuda.Stream()
+    for binding in engine:
+        size = trt.volume(engine.get_tensor_shape(binding)) * input_shape[0][0]
+        dtype = trt.nptype(engine.get_tensor_dtype(binding))
+        host_mem = cuda.pagelocked_empty(size, dtype)
+        device_mem = cuda.mem_alloc(host_mem.nbytes)
+        bindings.append(int(device_mem))
+        if engine.binding_is_input(binding):
+            inputs.append(device_mem)
+        else:
+            outputs.append(device_mem)
+            output_shape = (input_shape[0][0],) + tuple(engine.get_tensor_shape(binding)[1:])
+            output_data = np.empty(output_shape, dtype=dtype)
+
+    for i, input_mem in enumerate(inputs):
+        cuda.memcpy_htod_async(input_mem, input_data[input_name[i]], stream)
+
+    context.execute_async(bindings=bindings, stream_handle=stream.handle)
+    for i, output_mem in enumerate(outputs):
+        cuda.memcpy_dtoh_async(output_data[i], output_mem, stream)
+
+    stream.synchronize()
+
     return output_data
 
 
 if __name__ == '__main__':
-    make_graph(op_type='MaxPool', kwargs={'auto_pad': b'SAME_UPPER', 'kernel_shape': [3, 3], 'strides': [2, 2]},input_name=('x',), input_shape=([1, 1, 5, 5],), input_dtype=('FLOAT',), output_name=('y',),output_shape=([1, 1, 3, 3],), output_dtype=('FLOAT',))
+    # make_graph(op_type='Expand', kwargs={}, input_name=('X', 'shape'), input_shape=([1, 3, 1], [3]),
+    #            input_dtype=('FLOAT', 'INT64'), output_name=('Y',), output_shape=([3, 3, 3],), output_dtype=('FLOAT',))
+    # make_graph(op_type='Bernoulli', kwargs={}, input_name=('x',), input_shape=([10],), input_dtype=('DOUBLE',),
+    #            output_name=('y',), output_shape=([10],), output_dtype=('DOUBLE',))
+    make_graph(op_type='MaxPool', kwargs={'auto_pad': b'SAME_UPPER', 'kernel_shape': [3, 3], 'strides': [2, 2]},
+               input_name=('x',), input_shape=([1, 1, 5, 5],), input_dtype=('FLOAT',), output_name=('y',),
+               output_shape=([1, 1, 3, 3],), output_dtype=('FLOAT',))
