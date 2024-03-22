@@ -1,4 +1,5 @@
-## OPERA: Don't Miss the Model Loading in Deep Learning Compiler Testing
+## A Tale of Two DL Cities: When Library Tests Meet Compiler
+
 OPERA is a test-migration-based technique to improve the testing of the model loading stage of DL compilers.
 It considers different sources of test inputs in DL libraries for migration.
 Also, it designs a diversity-based test prioritization strategy to migrate and execute those test inputs that are more likely to detect diverse bugs in the model loading stage, to improve the testing efficiency.
@@ -11,7 +12,7 @@ For each model format (i.e., PyTorch, Keras, and ONNX), we set up a directory in
 Each project directory includes the following items:
 * **migrate**: It includes the source code for collected test inputs from DL libraries and converts them into DL models for testing DL compilers.
 * **data**: the collected test inputs from DL libraries and equipped test inputs from DL compilers for test prioritization
-* **TCP**: the test prioritization strategy of OPERA for rank all migrated test inputs
+* **TCP**: the test prioritization strategy of OPERA for ranking all migrated test inputs
 * **fuzz**: script for running the collected test inputs to detect bugs in DL compilers
 
 
