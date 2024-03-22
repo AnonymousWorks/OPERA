@@ -66,6 +66,7 @@ Therefore, RAUC-s are proposed to measure the prioritization effectiveness when 
 Specifically, it is calculated based on the prioritization result graph with the number of tests as the x-axis and the bug number as the y-axis.
 The RAUC is determined by calculating the area under the curve of the prioritization technique and contrasting it with the area under the curve of the ideal prioritization, which represents the sequential order in which the test cases would have been executed had all bugs been known beforehand.
 In our study, we evaluated the performance of the TCP technique on different proportions of test cases, specifically 25\%, 50\%, 75\%, and 100\% of the total number of tests, which we referred to as RAUC-25\%, RAUC-50\%, RAUC-75\%, and RAUC-100\% respectively. A higher value of RAUC-k indicates better performance of the prioritization strategy. The bold in the table means the best value.
+![image](https://github.com/AnonymousWorks/OPERA/assets/89679728/3c0e7e36-5974-4ff6-af7f-17ff2a2952f8)
 
 
 
