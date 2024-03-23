@@ -75,3 +75,18 @@ In our study, we evaluated the performance of the TCP technique on different pro
 The ID of each bug detected by OPERA will be released after the paper review due to the double-blind policy.
 
 
+
+### Templates of Model Generation for Three Libraries
+
+#### 1. PyTorch
+
+   ![torch_template](https://github.com/AnonymousWorks/OPERA/assets/89128704/6d233eb0-0746-4711-a675-3cb3e1519b16)
+
+#### 2. Keras
+
+   ![keras_template](https://github.com/AnonymousWorks/OPERA/assets/89128704/10e34068-8dae-47f4-90ec-7505aa9f3744)
+
+#### 3. ONNX
+
+   ![onnx_template](https://github.com/AnonymousWorks/OPERA/assets/89128704/75b37d1d-e23d-48b5-adfa-3effe4b505d5)
+
