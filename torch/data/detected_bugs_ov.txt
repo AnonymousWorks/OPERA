@@ -46,6 +46,9 @@
 8520	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 12577	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 440	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
+12923	crash	max_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_Argument element types do not match .
+3425	crash	max_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_Argument element types do not match .
+5722	crash	max_pool2d	OpConversionFailure_/openvino/frontend/frontend.py_18_Argument element types do not match .
 8541	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 7199	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 13953	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
@@ -147,7 +150,7 @@
 10740	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 3998	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 13446	crash	max_pool1d	OpConversionFailure_/openvino/frontend/frontend.py_18_Expected a 3D, 4D or 5D tensor for the input. Got:
-2648	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
+2648	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_Expected a 3D, 4D or 5D tensor for the input. Got:
 6722	crash	avg_pool3d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
 16179	crash	Conv3d	IndexError_/openvino/runtime/utils/data_helpers/data_dispatcher.py_82_index 0 is out of bounds for axis 0 with size 0
 1327	crash	avg_pool2d	OpConversionFailure_/openvino/frontend/frontend.py_18_None constant cannot be converted to OpenVINO opset and should be removed by consuming operation.
